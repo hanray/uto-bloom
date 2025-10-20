@@ -1,0 +1,139 @@
+{
+  "version": "1.0",
+  "endpoints": [
+    {
+      "path": "/ingest",
+      "method": "POST",
+      "description": "Accept sensor readings from devices",
+      "requirements": [
+        "BR-FW-004",
+        "BR-SV-001",
+        "BR-SV-002",
+        "FR-SV-001",
+        "FR-FW-003"
+      ],
+      "implementation": "server/routes/ingest.js"
+    },
+    {
+      "path": "/history",
+      "method": "GET",
+      "description": "Retrieve historical readings for 24h or 7d range",
+      "requirements": [
+        "FR-SV-002",
+        "BR-SV-003"
+      ],
+      "implementation": "server/routes/history.js"
+    },
+    {
+      "path": "/live",
+      "method": "WebSocket",
+      "description": "Real-time stream of sensor updates",
+      "requirements": [
+        "FR-SV-002"
+      ],
+      "implementation": "server/routes/live.js"
+    },
+    {
+      "path": "/nodes/:id",
+      "method": "GET",
+      "description": "Get current status and details for a specific node",
+      "requirements": [
+        "BR-SV-004",
+        "FR-SV-003"
+      ],
+      "implementation": "server/routes/nodes.js"
+    }
+  ],
+  "routes": [
+    {
+      "path": "/",
+      "component": "Home",
+      "description": "Main plant status overview",
+      "requirements": [
+        "BR-UX-001",
+        "FR-UI-001",
+        "BR-ST-001",
+        "BR-ST-002",
+        "BR-ST-003",
+        "BR-ST-004"
+      ],
+      "implementation": "client/src/pages/Home.jsx"
+    },
+    {
+      "path": "/details",
+      "component": "Details",
+      "description": "Detailed plant status with explanations",
+      "requirements": [
+        "BR-UX-002",
+        "FR-UI-002"
+      ],
+      "implementation": "client/src/pages/Details.jsx"
+    },
+    {
+      "path": "/history",
+      "component": "History",
+      "description": "24h and 7d trend charts",
+      "requirements": [
+        "BR-UX-004",
+        "FR-UI-003"
+      ],
+      "implementation": "client/src/pages/History.jsx"
+    },
+    {
+      "path": "/onboarding",
+      "component": "Onboarding",
+      "description": "Plant catalog search and selection",
+      "requirements": [
+        "BR-UX-003",
+        "FR-UI-004"
+      ],
+      "implementation": "client/src/pages/Onboarding.jsx"
+    }
+  ],
+  "firmware": [
+    {
+      "module": "Sampling",
+      "description": "Scheduled sensor readings",
+      "requirements": [
+        "BR-FW-001",
+        "FR-FW-002"
+      ],
+      "implementation": "firmware/sampling.ino"
+    },
+    {
+      "module": "Power Management",
+      "description": "Duty-cycle power control for probe",
+      "requirements": [
+        "BR-FW-002",
+        "FR-FW-001"
+      ],
+      "implementation": "firmware/power-management.ino"
+    },
+    {
+      "module": "Calibration",
+      "description": "Dry/Wet calibration storage",
+      "requirements": [
+        "BR-FW-003",
+        "FR-FW-005"
+      ],
+      "implementation": "firmware/calibration.ino"
+    },
+    {
+      "module": "HTTP Client",
+      "description": "POST JSON payloads to server",
+      "requirements": [
+        "BR-FW-004",
+        "FR-FW-003"
+      ],
+      "implementation": "firmware/http-client.ino"
+    },
+    {
+      "module": "Offline Buffer",
+      "description": "Store readings when offline",
+      "requirements": [
+        "FR-FW-004"
+      ],
+      "implementation": "firmware/offline-buffer.ino"
+    }
+  ]
+}

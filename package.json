@@ -4,7 +4,9 @@
   "description": "**A cross-platform Progressive Web App (PWA) for smart indoor plant care**",
   "main": "test-db-connection.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "verify:features": "node scripts/verify-features.js",
+    "status": "node scripts/verify-features.js"
   },
   "keywords": [],
   "author": "",
