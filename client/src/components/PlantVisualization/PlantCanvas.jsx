@@ -23,12 +23,12 @@ function Effects() {
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
     
-    // Toned down bloom settings
+    // Bloom settings locked to prevent clipping
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(size.width, size.height),
-      0.85,  // strength
-      0.40,  // radius
-      0.88   // threshold (higher = less bloom)
+      0.75,  // strength: 0.65-0.85 range
+      0.40,  // radius: 0.35-0.45 range
+      0.91   // threshold: 0.90-0.92 range (higher = less bloom)
     );
     composer.addPass(bloomPass);
     

@@ -18,6 +18,7 @@ export function createSDFLeafEmissiveMaterial(options = {}) {
     depthTest: true,
     side: THREE.DoubleSide,
     blending: THREE.AdditiveBlending,
+    premultipliedAlpha: true,
     color: healthColor
   });
 
@@ -27,7 +28,7 @@ export function createSDFLeafEmissiveMaterial(options = {}) {
     uMoisture: { value: moisture },
     uHealthColor: { value: healthColor.clone() },
     uSparkleTexture: { value: sparkleTexture },
-    uMaxGlow: { value: 1.1 } // Cap glow to prevent clipping
+    uMaxGlow: { value: 1.3 } // Cap glow: 1.2-1.4 range to prevent clipping
   };
 
   // Inject emissive shader
@@ -79,13 +80,13 @@ export function createSDFLeafEmissiveMaterial(options = {}) {
       
       if (alpha < 0.01) discard;
       
-      // Edge glow (simple radial gradient from center) - CAPPED
-      float edgeGlow = smoothstep(0.6, 1.0, dist) * 2.0;
-      edgeGlow = min(edgeGlow, uMaxGlow); // Cap to prevent clipping
-      vec3 rimGlow = uHealthColor * edgeGlow;
+      // === Calculate base glow and sparkles ===
+      
+      // Edge glow (simple radial gradient from center)
+      float baseGlow = smoothstep(0.6, 1.0, dist) * 2.0;
       
       // === SPARKLE SYSTEM 1: Flowing sparkles (original) ===
-      vec3 flowingSparkles = vec3(0.0);
+      float flowingSparkle = 0.0;
       
       // Multi-layer sparkles with different speeds
       vec2 sparkleUV1 = vUv * 2.0 + vec2(uTime * 0.2, uTime * 0.1);
@@ -101,11 +102,11 @@ export function createSDFLeafEmissiveMaterial(options = {}) {
       sparkle3 = step(0.80, sparkle3);
       
       float combinedFlowing = max(max(sparkle1, sparkle2), sparkle3 * 0.8);
-      flowingSparkles = uHealthColor * combinedFlowing * 15.0;
-      flowingSparkles *= 0.7 + sin(uTime * 4.0 + vUv.x * 15.0) * 0.3;
+      flowingSparkle = combinedFlowing * 15.0;
+      flowingSparkle *= 0.7 + sin(uTime * 4.0 + vUv.x * 15.0) * 0.3;
       
       // === SPARKLE SYSTEM 2: Anchored twinkling points ===
-      vec3 anchoredSparkles = vec3(0.0);
+      float anchoredSparkle = 0.0;
       
       // Use leaf UV (anchored to geometry, not flowing)
       vec2 anchoredUV = vUv + vec2(0.04 * uTime, 0.0); // Very slow drift
@@ -120,18 +121,18 @@ export function createSDFLeafEmissiveMaterial(options = {}) {
       float twinkle = 0.5 + 0.5 * sin(uTime * 3.0 + noiseValue * 100.0);
       sparklePoint *= twinkle;
       
-      // Per-sparkle alpha clamped to 0.6, premultiplied
+      // Per-sparkle alpha clamped to 0.6
       float sparkleAlpha = min(sparklePoint, 0.6);
-      anchoredSparkles = uHealthColor * sparkleAlpha * 8.0;
+      anchoredSparkle = sparkleAlpha * 8.0;
       
-      // Combine both sparkle systems + rim
-      vec3 finalColor = rimGlow + flowingSparkles + anchoredSparkles;
+      // === Combine and clamp to prevent blowout ===
+      float e = baseGlow + flowingSparkle + anchoredSparkle;
+      e = min(e, uMaxGlow); // Clamp total emissive intensity
       
-      // Cap final glow
-      finalColor = min(finalColor, vec3(uMaxGlow));
+      vec3 emissive = uHealthColor * e;
       
-      // Additive blending (alpha used for intensity control)
-      diffuseColor = vec4(finalColor, alpha * 0.5);
+      // Premultiplied alpha for additive blending
+      diffuseColor = vec4(emissive * alpha, alpha * 0.5);
       `
     );
 
