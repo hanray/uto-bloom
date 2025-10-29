@@ -1,44 +1,42 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
-import { getMoistureColorThree, calculateMoistureScore } from '../../utils/plantGeneration/colorMapping';
+import { createOrganicLeafGeometry } from '../../utils/plantGeneration/createOrganicLeafGeometry';
+import { createCentralStem, createPetioleCurve, createPetioleMesh } from './utils/createStemAndPetiole';
 import { createSDFLeafBaseMaterial } from './materials/SDFLeafBase_CLEAN';
 import { createSDFLeafEmissiveMaterial } from './materials/SDFLeafEmissive_CLEAN';
+import { calculateMoistureScore } from '../../utils/plantGeneration/colorMapping';
 
-// Import sparkle texture as a module (Vite will handle the path)
-import sparkleTextureUrl from '../../assets/textures/texture2.png'; // TRYING TEXTURE2
+// Import sparkle texture
+import sparkleTextureUrl from '../../assets/textures/texture2.png';
 
 /**
- * ProceduralPlant - Money Tree (Pachira aquatica)
- * SDF liquid-cloth leaves with translucency and sparkles
+ * ProceduralPlant - Monstera Deliciosa with Stem + Petiole System
+ * SDF materials with natural green colors
  */
 function ProceduralPlant({ moisture = 343, speciesProfile }) {
-  // Leaf rendering refs (SDF multi-pass)
-  const leavesBaseLayer0Ref = useRef();
-  const leavesBaseLayer1Ref = useRef();
-  const leavesBaseLayer2Ref = useRef();
+  // Refs for leaves (base + emissive layers)
+  const leavesBaseRef = useRef();
   const leavesEmissiveRef = useRef();
-  const leavesGlowRef = useRef(); // NEW: Glow halo layer
   
-  // Material refs for uniform updates
-  const baseLayer0MatRef = useRef();
-  const baseLayer1MatRef = useRef();
-  const baseLayer2MatRef = useRef();
-  const emissiveMatRef = useRef();
-  const glowMatRef = useRef(); // NEW: Glow material ref
+  // Refs for stem and petioles
+  const petiolesGroupRef = useRef();
+  const centralStemRef = useRef();
   
-  // Trunk material ref
-  const trunkMaterialRef = useRef();
+  // Stalk group ref for unified sway animation
+  const stalkGroupRef = useRef();
   const timeRef = useRef(0);
   
-  // Load REAL sparkle texture from assets (using Vite import)
+  // Material refs for uniform updates
+  const baseMatRef = useRef();
+  const emissiveMatRef = useRef();
+  
+  // Load sparkle texture
   const sparkleTexture = useLoader(THREE.TextureLoader, sparkleTextureUrl);
   
-  // Configure texture for tiling and sparkle effect
+  // Configure texture
   useEffect(() => {
     if (sparkleTexture) {
-      console.log('✅ Sparkle texture loaded:', sparkleTextureUrl);
-      console.log('   Texture size:', sparkleTexture.image.width, 'x', sparkleTexture.image.height);
       sparkleTexture.wrapS = THREE.RepeatWrapping;
       sparkleTexture.wrapT = THREE.RepeatWrapping;
       sparkleTexture.minFilter = THREE.LinearFilter;
@@ -46,99 +44,168 @@ function ProceduralPlant({ moisture = 343, speciesProfile }) {
     }
   }, [sparkleTexture]);
   
-  // Get health color based on moisture
-  const healthColorHex = getMoistureColorThree(moisture, speciesProfile.healthThresholds);
-  const healthColor = new THREE.Color(healthColorHex);
-  
-  // Calculate moisture score
+  // Calculate moisture score for material
   const moistureScore = calculateMoistureScore(moisture, speciesProfile.healthThresholds);
   
-  // Create SDF leaf materials (3 base layers + 1 emissive + 1 glow halo)
-  const sdfMaterials = useMemo(() => {
-    if (!sparkleTexture) return null; // Wait for texture to load
+  // Natural green color (instead of cyan/magenta neon)
+  const leafColor = useMemo(() => {
+    // Base: Rich forest green
+    const baseGreen = new THREE.Color(0.18, 0.45, 0.22);
     
-    const healthColorInit = new THREE.Color(healthColorHex);
-    const moistureScoreInit = calculateMoistureScore(moisture, speciesProfile.healthThresholds);
+    // Healthy: Brighter, more saturated green
+    const healthyGreen = new THREE.Color(0.25, 0.55, 0.28);
+    
+    // Dry: More olive/yellowish green
+    const dryGreen = new THREE.Color(0.35, 0.48, 0.20);
+    
+    // Interpolate based on moisture
+    if (moistureScore > 0.6) {
+      // Healthy range: interpolate to bright green
+      const t = (moistureScore - 0.6) / 0.4;
+      return new THREE.Color().lerpColors(baseGreen, healthyGreen, t);
+    } else {
+      // Dry range: interpolate to olive
+      const t = moistureScore / 0.6;
+      return new THREE.Color().lerpColors(dryGreen, baseGreen, t);
+    }
+  }, [moistureScore, speciesProfile]);
+  
+  // Get leaf parameters from species profile
+  const leafParams = speciesProfile.leaf || speciesProfile.leaves;
+  const leafCount = leafParams.count || 12;
+  const layers = leafParams.layers || 2; // Reduced for performance
+  const segments = leafParams.segments || [32, 8];
+  const size = leafParams.size || [0.42, 0.56];
+  const organic = leafParams.organic || {
+    ribCurvature: 0.18,
+    archConcavity: 0.22,
+    tipTwist: 0.35,
+    thickness: 0.007,
+    rimCurl: 0.15,
+    noiseAmp: 0.0015
+  };
+  const totalInstances = leafCount * layers;
+  
+  // Create organic leaf geometry with curvature (mature version as base)
+  const leafletGeometry = useMemo(() => {
+    const shape = leafParams.shape || {};
+    
+    const geom = createOrganicLeafGeometry({
+      width: size[0] * 2,
+      height: size[1],
+      segmentsX: segments[0],
+      segmentsY: segments[1],
+      ribCurvature: organic.ribCurvature,
+      archConcavity: organic.archConcavity,
+      tipTwist: organic.tipTwist,
+      thickness: organic.thickness,
+      rimCurl: organic.rimCurl,
+      // FEATURE FLAG: Enable fenestrations/splits for Monstera only
+      useCutMasks: leafParams.useCutMasks || false,
+      // Use mature level - we'll limit via shader masking for young leaves
+      maturity: 0.85,
+      // Fenestrations from JSON
+      fenCount: shape.fenestrationCount || 8,
+      fenInner: 0.22,
+      fenOuter: 0.78,
+      fenSize: shape.fenestrationSize || 0.12,
+      fenAspect: shape.fenestrationElongation || 2.2,
+      fenBias: shape.fenestrationBias || 0.35,
+      // Edge splits from JSON
+      splitCount: shape.splitFrequency || 7,
+      splitDepth: shape.splitDepth || 0.35,
+      splitTaper: shape.splitTaper || 0.6
+    });
+    
+    // Add instance attributes for shader optimization
+    const leafIndexArray = new Float32Array(totalInstances);
+    const layerIdArray = new Float32Array(totalInstances);
+    const seedArray = new Float32Array(totalInstances);
+    
+    for (let i = 0; i < totalInstances; i++) {
+      const leafIndex = Math.floor(i / layers);
+      const layerId = i % layers;
+      
+      leafIndexArray[i] = leafIndex;
+      layerIdArray[i] = layerId;
+      seedArray[i] = Math.random(); // Per-instance random seed
+    }
+    
+    geom.setAttribute('aLeafIndex', new THREE.InstancedBufferAttribute(leafIndexArray, 1));
+    geom.setAttribute('aLayerId', new THREE.InstancedBufferAttribute(layerIdArray, 1));
+    geom.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seedArray, 1));
+    
+    return geom;
+  }, [size, segments, organic, totalInstances, leafCount, layers]);
+  
+  // Create SDF leaf materials with enhanced bioluminescence
+  const sdfMaterials = useMemo(() => {
+    if (!sparkleTexture) return null;
+    
+    const materialConfig = speciesProfile.material || {};
     
     return {
-      baseLayer0: createSDFLeafBaseMaterial({
-        healthColor: healthColorInit,
-        moisture: moistureScoreInit,
-        layerId: 0
-      }),
-      baseLayer1: createSDFLeafBaseMaterial({
-        healthColor: healthColorInit,
-        moisture: moistureScoreInit,
-        layerId: 1
-      }),
-      baseLayer2: createSDFLeafBaseMaterial({
-        healthColor: healthColorInit,
-        moisture: moistureScoreInit,
-        layerId: 2
+      base: createSDFLeafBaseMaterial({
+        healthColor: leafColor,
+        moisture: moistureScore,
+        blueNoiseTexture: sparkleTexture,
+        leafCount: leafCount,
+        layers: layers,
+        layerOffset: leafParams.layerOffset || 0.0025,
+        blueNoiseScale: leafParams.blueNoiseScale || 4.0,
+        useCutMasks: leafParams.useCutMasks || false,
+        // Biolumen parameters from JSON
+        transmission: materialConfig.transmission || 0.45,
+        thickness: materialConfig.thickness || 0.002,
+        ior: materialConfig.ior || 1.45,
+        clearcoat: materialConfig.clearcoat || 0.35,
+        clearcoatRoughness: materialConfig.clearcoatRoughness || 0.10,
+        roughness: materialConfig.roughness || 0.15,
+        uBacklight: materialConfig.uBacklight || 0.8,
+        uVeinGloss: materialConfig.uVeinGloss || 0.85,
+        uIridescence: materialConfig.uIridescence || 0.35,
+        fresnelStrength: materialConfig.fresnelStrength || 0.75,
+        fresnelPower: materialConfig.fresnelPower || 2.5,
+        edgeGlowColor: materialConfig.edgeGlowColor || [0.6, 0.9, 0.7],
+        backlightAmplification: materialConfig.backlightAmplification || 0.4,
+        veinTransmissionBlock: materialConfig.veinTransmissionBlock || 0.6,
+        internalGlowColor: materialConfig.internalGlowColor || [0.4, 0.7, 0.4],
+        gradientCenterColor: materialConfig.gradientCenterColor || [0.2, 0.4, 0.2],
+        gradientEdgeColor: materialConfig.gradientEdgeColor || [0.5, 0.8, 0.4],
+        gradientStrength: materialConfig.gradientStrength || 0.7
       }),
       emissive: createSDFLeafEmissiveMaterial({
-        healthColor: healthColorInit,
-        moisture: moistureScoreInit,
-        sparkleTexture: sparkleTexture, // FIXED: Match parameter name in shader
-        sparkleSpeed: 1.5,       // BOOSTED for more visible animation
-        sparkleDensity: 1.2      // BOOSTED for more sparkles
-      }),
-      // NEW: Simple glow halo material (additive blending)
-      glow: new THREE.MeshBasicMaterial({
-        color: healthColorInit,
-        transparent: true,
-        opacity: 0.4,
-        side: THREE.DoubleSide,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
+        healthColor: leafColor,
+        moisture: moistureScore,
+        sparkleTexture: sparkleTexture,
+        leafCount: leafCount,
+        layers: layers,
+        layerOffset: leafParams.layerOffset || 0.0025,
+        blueNoiseScale: leafParams.blueNoiseScale || 4.0,
+        useCutMasks: leafParams.useCutMasks || false
       })
     };
-  }, [sparkleTexture, speciesProfile, healthColorHex, moisture]);
+  }, [sparkleTexture, leafColor, moistureScore, leafCount, layers, leafParams, speciesProfile]);
   
-  // Store material refs for useFrame updates
+  // Store material refs
   useEffect(() => {
-    if (!sdfMaterials) return; // Wait for materials to be created
-    baseLayer0MatRef.current = sdfMaterials.baseLayer0;
-    baseLayer1MatRef.current = sdfMaterials.baseLayer1;
-    baseLayer2MatRef.current = sdfMaterials.baseLayer2;
+    if (!sdfMaterials) return;
+    baseMatRef.current = sdfMaterials.base;
     emissiveMatRef.current = sdfMaterials.emissive;
-    glowMatRef.current = sdfMaterials.glow;
   }, [sdfMaterials]);
   
-  // Target color for smooth transitions
-  const targetColorRef = useRef(healthColor.clone());
-  const currentColorRef = useRef(healthColor.clone());
+  // Create central stem mesh
+  const centralStem = useMemo(() => {
+    if (!speciesProfile.stem) return null;
+    return createCentralStem(speciesProfile.stem);
+  }, [speciesProfile]);
   
-  // Trunk geometry
-  const trunkGeometry = useMemo(() => {
-    const geometry = new THREE.CylinderGeometry(
-      0.05,  // top radius
-      0.08,  // bottom radius - thicker at base
-      2.5,   // height - tall
-      16,    // segments - smooth cylinder
-      1
-    );
-    
-    return geometry;
-  }, []);
-
-  // Create realistic palmate leaf (one leaflet with proper shape)
-  // NOTE: Using PlaneGeometry for proper UVs - SDF shader will handle the leaf shape
-  const leafletGeometry = useMemo(() => {
-    const geometry = new THREE.PlaneGeometry(0.5, 1.0, 1, 1);
-    
-    // Add subtle curvature to make leaves look 3D
-    const positions = geometry.attributes.position.array;
-    for (let i = 0; i < positions.length; i += 3) {
-      const y = positions[i + 1];
-      // Curve outward along the length
-      positions[i + 2] = Math.sin((y + 0.5) * Math.PI) * 0.05;
+  // Store stem ref for pulsing animation
+  useEffect(() => {
+    if (centralStem) {
+      centralStemRef.current = centralStem;
     }
-    geometry.attributes.position.needsUpdate = true;
-    geometry.computeVertexNormals();
-    
-    return geometry;
-  }, []);
+  }, [centralStem]);
 
   // Create simple plant pot
   const potGeometry = useMemo(() => {
@@ -160,186 +227,203 @@ function ProceduralPlant({ moisture = 343, speciesProfile }) {
     return geometry;
   }, []);
 
-  // Position palmate leaf clusters realistically (applied to all SDF layer instances + glow)
+  // Position leaves with stem and petiole system
   useEffect(() => {
-    const allLeafRefs = [
-      leavesBaseLayer0Ref.current,
-      leavesBaseLayer1Ref.current,
-      leavesBaseLayer2Ref.current,
-      leavesEmissiveRef.current,
-      leavesGlowRef.current // NEW: Include glow layer
-    ];
+    if (!leavesBaseRef.current || !leavesEmissiveRef.current) return;
+    if (!petiolesGroupRef.current) return;
     
-    // Only proceed if all refs are ready
-    if (allLeafRefs.some(ref => !ref)) return;
+    const cluster = speciesProfile.cluster || { spiralTurn: 137.5, radius: 0.42, elevation: 0.12 };
+    const petioleSpec = speciesProfile.petiole || {};
+    const stemSpec = speciesProfile.stem || {};
     
-    const clusterCount = 3; // 3 main leaf clusters (reduced from 4 for debugging)
-    const leafletsPerCluster = 4; // 4 leaflets per palmate leaf (reduced from 5)
+    const spiralAngle = cluster.spiralTurn || 137.5;
+    const baseRadius = cluster.radius;
+    const elevation = cluster.elevation;
+    const stemHeight = stemSpec.height || 0.55;
+    
     const dummy = new THREE.Object3D();
     
-    let leafletIndex = 0;
+    // Clear previous petioles
+    while (petiolesGroupRef.current.children.length > 0) {
+      petiolesGroupRef.current.remove(petiolesGroupRef.current.children[0]);
+    }
     
-    for (let cluster = 0; cluster < clusterCount; cluster++) {
-      // Position clusters around top of trunk
-      const clusterAngle = (cluster / clusterCount) * Math.PI * 2 + Math.random() * 0.3;
-      const clusterHeight = 1.0 + (Math.random() - 0.5) * 0.3;
-      const clusterRadius = 0.1 + Math.random() * 0.05;
+    let instanceIndex = 0;
+    
+    for (let leafIndex = 0; leafIndex < leafCount; leafIndex++) {
+      // Calculate spiral position for this leaf
+      const angle = (leafIndex * spiralAngle * Math.PI / 180);
+      const heightOnStem = (leafIndex / leafCount) * stemHeight;
       
-      // Central stem position
-      const stemX = Math.cos(clusterAngle) * clusterRadius;
-      const stemZ = Math.sin(clusterAngle) * clusterRadius;
+      // Stem attachment point (on central stem)
+      const stemAttach = new THREE.Vector3(0, heightOnStem, 0);
       
-      // Create 5 leaflets radiating from center (palmate pattern)
-      for (let leaflet = 0; leaflet < leafletsPerCluster; leaflet++) {
-        // Spread leaflets in a fan (like fingers on a hand)
-        const fanAngle = (leaflet - 2) * 0.35; // Center leaflet at 0, others spread ±0.35 rad
-        const outwardDistance = 0.8 + (Math.abs(leaflet - 2) * 0.1); // Center leaflet longest
+      // VARIED PETIOLE LENGTH (like reference photos)
+      // Lower leaves have longer petioles reaching outward
+      // Upper leaves have shorter petioles, more compact
+      const petioleHeightFactor = 1.0 - (heightOnStem / stemHeight); // 1.0 at base, 0.0 at top
+      const petioleLengthVariation = 0.7 + petioleHeightFactor * 0.8; // 0.7-1.5x length
+      const adjustedPetioleLength = (petioleSpec.length || 0.55) * petioleLengthVariation;
+      
+      // Create adjusted petiole spec
+      const adjustedPetioleSpec = {
+        ...petioleSpec,
+        length: adjustedPetioleLength
+      };
+      
+      // Leaf position (outward from stem)
+      const radiusVar = 1.0 + 0.15 * Math.sin(leafIndex * 0.9);
+      const radius = baseRadius * radiusVar;
+      const leafX = Math.cos(angle) * radius;
+      const leafZ = Math.sin(angle) * radius;
+      const leafY = heightOnStem + elevation * 0.5; // Slightly raised
+      const leafPosition = new THREE.Vector3(leafX, leafY, leafZ);
+      
+      // Create petiole curve and mesh with adjusted length
+      const curve = createPetioleCurve(stemAttach, leafPosition, adjustedPetioleSpec);
+      const petioleMesh = createPetioleMesh(curve, adjustedPetioleSpec);
+      petiolesGroupRef.current.add(petioleMesh);
+      
+      // Random jitter from JSON
+      const yawJitter = (Math.random() - 0.5) * (leafParams.yawJitter || 0.18);
+      const pitchJitter = (Math.random() - 0.5) * (leafParams.pitchJitter || 0.12);
+      const tiltUp = leafParams.tiltUp || 0.35;
+      
+      // Size variation: 3-5 big leaves, rest small (half size)
+      const v = leafIndex / (leafCount - 1);
+      
+      // Determine if this is a "big" leaf (mature) or "small" leaf (young/immature)
+      // First ~3-5 leaves are big, rest are small
+      const bigLeafCount = Math.floor(leafCount * 0.5); // ~50% are big
+      const isBigLeaf = leafIndex < bigLeafCount;
+      
+      let scaleFactor;
+      if (isBigLeaf) {
+        // BIG MATURE LEAVES: Base size with variation (80%-120%)
+        const sizeVariation = 0.8 + Math.random() * 0.4;
+        scaleFactor = 1.0 * sizeVariation;
+      } else {
+        // SMALL IMMATURE LEAVES: Half size with variation (40%-60% of big leaves)
+        const sizeVariation = 0.8 + Math.random() * 0.4;
+        scaleFactor = 0.5 * sizeVariation;
+      }
+      
+      // RARE gravity droop: only ~20% of leaves droop significantly
+      const droopChance = Math.random();
+      let droopAngle = 0.0;
+      if (droopChance < 0.2) {
+        // Rare heavy droop (large mature leaves)
+        const leafWeight = scaleFactor * scaleFactor;
+        droopAngle = leafWeight * 0.4;
+      } else if (droopChance < 0.4) {
+        // Occasional slight droop
+        droopAngle = Math.random() * 0.15;
+      }
+      // else: 60% of leaves point upward with no droop
+      
+      // PHOTOTROPISM: Leaves orient towards sun position [3, 4, 2]
+      const sunPosition = new THREE.Vector3(3, 4, 2);
+      const leafToSun = new THREE.Vector3().subVectors(sunPosition, leafPosition);
+      leafToSun.normalize();
+      
+      // Calculate angle towards sun (stronger for upper leaves, weaker for lower)
+      const phototropismStrength = 0.5 + (heightOnStem / stemHeight) * 0.5; // 0.5-1.0
+      const targetDirection = new THREE.Vector3()
+        .addVectors(
+          new THREE.Vector3(0, 1, 0), // Base upward
+          leafToSun.multiplyScalar(phototropismStrength * 1.5) // Pull towards sun
+        )
+        .normalize();
+      
+      // Create each layer for this leaf
+      for (let layerId = 0; layerId < layers; layerId++) {
+        dummy.position.copy(leafPosition);
         
-        // Calculate leaflet position
-        const leafletAngle = clusterAngle + fanAngle;
-        dummy.position.set(
-          stemX + Math.cos(leafletAngle) * outwardDistance,
-          clusterHeight + 0.2,
-          stemZ + Math.sin(leafletAngle) * outwardDistance
-        );
+        // Orient leaf towards sun + apply jitter + droop
+        const lookTarget = new THREE.Vector3()
+          .copy(targetDirection)
+          .add(leafPosition);
         
-        // Orient leaflet upward and outward
-        const targetX = stemX + Math.cos(leafletAngle) * 3;
-        const targetZ = stemZ + Math.sin(leafletAngle) * 3;
-        dummy.lookAt(targetX, clusterHeight + 1.5, targetZ);
+        dummy.lookAt(lookTarget);
+        dummy.rotateX(-(Math.PI / 2) + tiltUp + pitchJitter - droopAngle);
+        dummy.rotateZ(yawJitter);
         
-        // Rotate to face upward
-        dummy.rotateX(-Math.PI / 2);
-        
-        // Add natural droop
-        dummy.rotateX(0.2 + Math.random() * 0.1);
-        
-        // Slight rotation variation
-        dummy.rotateZ((Math.random() - 0.5) * 0.2);
-        
-        // Size variation (center leaflets slightly larger)
-        const sizeVariation = leaflet === 2 ? 1.1 : 0.9 + Math.random() * 0.2;
-        dummy.scale.setScalar(sizeVariation);
+        // Apply size variation
+        dummy.scale.setScalar(scaleFactor);
         
         dummy.updateMatrix();
+        leavesBaseRef.current.setMatrixAt(instanceIndex, dummy.matrix);
+        leavesEmissiveRef.current.setMatrixAt(instanceIndex, dummy.matrix);
         
-        // Apply same transform to all leaf layers
-        allLeafRefs.forEach(ref => {
-          if (ref) ref.setMatrixAt(leafletIndex, dummy.matrix);
-        });
-        
-        // Apply SCALED UP transform to glow layer (bigger for halo effect)
-        if (leavesGlowRef.current) {
-          dummy.scale.setScalar(sizeVariation * 1.3); // 30% bigger for glow halo
-          dummy.updateMatrix();
-          leavesGlowRef.current.setMatrixAt(leafletIndex, dummy.matrix);
-        }
-        
-        leafletIndex++;
+        instanceIndex++;
       }
     }
     
-    // Mark all instance matrices for update
-    allLeafRefs.forEach(ref => {
-      if (ref) ref.instanceMatrix.needsUpdate = true;
-    });
-  }, [speciesProfile]);
+    // Mark for update
+    leavesBaseRef.current.instanceMatrix.needsUpdate = true;
+    leavesEmissiveRef.current.instanceMatrix.needsUpdate = true;
+  }, [leafCount, layers, speciesProfile, leafParams, totalInstances]);
 
-  // Update target color when moisture changes
-  useEffect(() => {
-    targetColorRef.current.set(healthColor);
-  }, [healthColor]);
-
-  // Animation loop - update SDF material uniforms
+  // Animation loop - update SDF uniforms + subtle global sway + stem pulsing
   useFrame((state, delta) => {
     timeRef.current += delta;
     
-    // 1. Pulsing glow animation - LOWER baseline to prevent clipping
-    const pulseSpeed = THREE.MathUtils.lerp(0.5, 2.0, 1 - moistureScore);
-    const pulseCycle = Math.sin(timeRef.current * pulseSpeed * Math.PI * 2) * 0.5 + 0.5;
-    
-    // Lower emissive baseline: 0.35-0.45, pulse amplitude ±0.15
-    const emissiveBase = 0.40;
-    const pulseAmplitude = 0.15;
-    
-    // Update trunk material with controlled glow
-    if (trunkMaterialRef.current) {
-      trunkMaterialRef.current.emissiveIntensity = emissiveBase + pulseCycle * pulseAmplitude;
+    // Global stem sway
+    if (stalkGroupRef.current) {
+      stalkGroupRef.current.rotation.z = Math.sin(timeRef.current * 0.3) * 0.02;
+      stalkGroupRef.current.rotation.x = Math.sin(timeRef.current * 0.25) * 0.015;
     }
     
-    // 2. Smooth color transitions
-    currentColorRef.current.lerp(targetColorRef.current, delta * 2);
-    if (trunkMaterialRef.current) {
-      trunkMaterialRef.current.color.copy(currentColorRef.current);
-      trunkMaterialRef.current.emissive.copy(currentColorRef.current);
+    // STEM AND PETIOLE PULSING (subtle breathing effect)
+    const pulseSpeed = 0.8; // Slow pulse
+    const pulseIntensity = 0.35; // Visible glow (increased from 0.15)
+    
+    // Animate central stem
+    if (centralStemRef.current && centralStemRef.current.material) {
+      const mat = centralStemRef.current.material;
+      const pulse = Math.sin(timeRef.current * pulseSpeed) * 0.5 + 0.5; // 0-1
+      mat.emissiveIntensity = pulse * pulseIntensity;
+      mat.needsUpdate = true;
     }
     
-    // Update glow material color
-    if (glowMatRef.current) {
-      glowMatRef.current.color.copy(currentColorRef.current);
-      glowMatRef.current.opacity = 0.3 + pulseCycle * 0.2; // Pulsing glow halo
-    }
-    
-    // 3. Update SDF material uniforms (all layers)
-    const sdfMats = [baseLayer0MatRef, baseLayer1MatRef, baseLayer2MatRef, emissiveMatRef];
-    sdfMats.forEach(matRef => {
-      if (matRef.current && matRef.current.userData.uniforms) {
-        const uniforms = matRef.current.userData.uniforms;
-        uniforms.uTime.value = timeRef.current;
-        uniforms.uMoisture.value = moistureScore;
-        uniforms.uHealthColor.value.copy(currentColorRef.current);
-        
-        // Sparkle density scales with moisture (emissive only)
-        if (matRef === emissiveMatRef && uniforms.uSparkleDensity) {
-          uniforms.uSparkleDensity.value = THREE.MathUtils.lerp(0.3, 1.0, moistureScore);
+    // Animate petioles (each with slight phase offset)
+    if (petiolesGroupRef.current) {
+      petiolesGroupRef.current.children.forEach((petioleMesh) => {
+        if (petioleMesh.material && petioleMesh.material.userData.pulsePhase !== undefined) {
+          const mat = petioleMesh.material;
+          const phase = mat.userData.pulsePhase;
+          const pulse = Math.sin(timeRef.current * pulseSpeed + phase) * 0.5 + 0.5;
+          mat.emissiveIntensity = pulse * pulseIntensity * 0.8; // Slightly dimmer than stem
+          mat.needsUpdate = true;
         }
-      }
-    });
-    
-    // 4. Leaf droop when dry (applied to all layer instances including glow)
-    if (moistureScore < 0.5) {
-      const allLeafRefs = [
-        leavesBaseLayer0Ref.current,
-        leavesBaseLayer1Ref.current,
-        leavesBaseLayer2Ref.current,
-        leavesEmissiveRef.current,
-        leavesGlowRef.current // Include glow in droop animation
-      ];
-      
-      const droopAmount = (0.5 - moistureScore) * 2;
-      const clusterCount = 4;
-      const leafletsPerCluster = 5;
-      const dummy = new THREE.Object3D();
-      
-      for (let i = 0; i < clusterCount * leafletsPerCluster; i++) {
-        // Get matrix from first layer (they're all identical positions)
-        if (allLeafRefs[0]) {
-          allLeafRefs[0].getMatrixAt(i, dummy.matrix);
-          dummy.matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
-          
-          // Droop leaflets downward
-          dummy.rotation.x += droopAmount * 0.2;
-          
-          dummy.updateMatrix();
-          
-          // Apply drooped transform to all layers
-          allLeafRefs.forEach(ref => {
-            if (ref) ref.setMatrixAt(i, dummy.matrix);
-          });
-        }
-      }
-      
-      // Mark all for update
-      allLeafRefs.forEach(ref => {
-        if (ref) ref.instanceMatrix.needsUpdate = true;
       });
+    }
+    
+    // Update SDF material uniforms
+    if (baseMatRef.current && baseMatRef.current.userData.uniforms) {
+      const uniforms = baseMatRef.current.userData.uniforms;
+      uniforms.uTime.value = timeRef.current;
+      uniforms.uMoisture.value = moistureScore;
+      uniforms.uHealthColor.value.copy(leafColor);
+    }
+    
+    if (emissiveMatRef.current && emissiveMatRef.current.userData.uniforms) {
+      const uniforms = emissiveMatRef.current.userData.uniforms;
+      uniforms.uTime.value = timeRef.current;
+      uniforms.uMoisture.value = moistureScore;
+      uniforms.uHealthColor.value.copy(leafColor);
     }
   });
 
   return (
-    <group rotation={[0, 0, 0]} position={[0, -1.2, 0]}>
-      {/* Show loading state while sparkle texture loads */}
-      {!sdfMaterials && <mesh><boxGeometry args={[0.1, 0.1, 0.1]} /><meshBasicMaterial color="cyan" /></mesh>}
+    <group rotation={[0, 0, 0]} position={[0, 0, 0]}>
+      {/* Show loading state while texture loads */}
+      {!sdfMaterials && (
+        <mesh>
+          <boxGeometry args={[0.1, 0.1, 0.1]} />
+          <meshBasicMaterial color="#00ff00" />
+        </mesh>
+      )}
       
       {sdfMaterials && (
         <>
@@ -349,53 +433,40 @@ function ProceduralPlant({ moisture = 343, speciesProfile }) {
             <meshBasicMaterial color="#000000" transparent opacity={0.8} />
           </mesh>
 
-          {/* Plant pot - solid with subtle glow */}
+          {/* Plant pot - solid with subtle reflection */}
           <mesh geometry={potGeometry} position={[0, -1.1, 0]}>
             <meshStandardMaterial 
               color="#2a2a2a"
-              roughness={0.8}
-              metalness={0.1}
-            />
-          </mesh>
-
-          {/* Trunk - solid with artistic glow (BOOSTED) */}
-          <mesh geometry={trunkGeometry}>
-            <meshStandardMaterial 
-              ref={trunkMaterialRef}
-              color={healthColor}
-              emissive={healthColor}
-              emissiveIntensity={0.7}
-              roughness={0.4}
+              roughness={0.6}
               metalness={0.2}
             />
           </mesh>
 
-          {/* GLOW HALO LAYER - Render FIRST (behind everything, large and blurred) */}
-          <instancedMesh 
-            ref={leavesGlowRef}
-            args={[leafletGeometry, sdfMaterials.glow, 20]}
-            renderOrder={-1}
-          />
+          {/* Unified stalk group - enables global sway */}
+          <group ref={stalkGroupRef} position={[0, -0.95, 0]}>
+            {/* Central stem - connect to pot */}
+            {centralStem && (
+              <primitive 
+                object={centralStem} 
+                ref={centralStemRef}
+              />
+            )}
+            
+            {/* Petioles group - dynamically populated */}
+            <group ref={petiolesGroupRef} />
 
-          {/* SDF Leaves - Base translucent pass (3 layers for depth) */}
-          <instancedMesh 
-            ref={leavesBaseLayer0Ref}
-            args={[leafletGeometry, sdfMaterials.baseLayer0, 20]}
-          />
-          <instancedMesh 
-            ref={leavesBaseLayer1Ref}
-            args={[leafletGeometry, sdfMaterials.baseLayer1, 20]}
-          />
-          <instancedMesh 
-            ref={leavesBaseLayer2Ref}
-            args={[leafletGeometry, sdfMaterials.baseLayer2, 20]}
-          />
+            {/* SDF Leaves - Base translucent pass with natural green */}
+            <instancedMesh 
+              ref={leavesBaseRef}
+              args={[leafletGeometry, sdfMaterials.base, totalInstances]}
+            />
 
-          {/* SDF Leaves - Emissive overlay (rim + sparkles) */}
-          <instancedMesh 
-            ref={leavesEmissiveRef}
-            args={[leafletGeometry, sdfMaterials.emissive, 20]}
-          />
+            {/* SDF Leaves - Subtle emissive rim (not overpowering) */}
+            <instancedMesh 
+              ref={leavesEmissiveRef}
+              args={[leafletGeometry, sdfMaterials.emissive, totalInstances]}
+            />
+          </group>
         </>
       )}
     </group>

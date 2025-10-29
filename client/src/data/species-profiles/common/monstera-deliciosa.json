@@ -1,0 +1,277 @@
+{
+  "id": "monstera-deliciosa",
+  "displayName": "Monstera Deliciosa",
+  "leaf": {
+    "count": 7,
+    "clusters": 2,
+    "size": [0.35, 0.55],
+    "segments": [64, 28],
+    "tiltUp": 0.35,
+    "yawJitter": 0.45,
+    "pitchJitter": 0.30,
+    "layers": 2,
+    "layerOffset": 0.0035,
+    "curlAmp": 0.7,
+    "blueNoiseScale": 4.2,
+    "useCutMasks": true,
+
+    "organic": {
+      "ribCurvature": 0.12,
+      "archConcavity": 0.15,
+      "tipTwist": 0.20,
+      "thickness": 0.004,
+      "rimCurl": 0.08,
+      "noiseAmp": 0.002,
+      "surfaceVariation": 0.015
+    },
+
+    "shape": {
+      "baseWidthRatio": 0.85,
+      "tipTaper": 0.40,
+      "splitAmplitude": 0.75,
+      "splitFrequency": 6,
+      "splitDepth": 0.45,
+      "splitTaper": 0.85,
+      "splitWidth": 0.06,
+      "splitInnerCurve": 0.5,
+      "splitOuterCurve": 0.4,
+      "lobeIndependence": 0.65,
+      "fenestrationCount": 6,
+      "fenestrationSize": 0.10,
+      "fenestrationBias": 0.45,
+      "fenestrationFalloff": 0.5,
+      "fenestrationAngle": 42,
+      "fenestrationElongation": 3.5,
+      "midribCurvature": 0.08,
+      "marginRipple": 0.05,
+      "lobeAsymmetry": 0.08,
+      "interLobeGap": 0.15,
+      "symmetryStrength": 0.92
+    },
+
+    "color": {
+      "baseHue": 145,
+      "saturation": 0.48,
+      "value": 0.38,
+      "specular": 0.35,
+      "glossiness": 0.75,
+      "subsurface": 0.15,
+      "veinColor": [0.2, 0.35, 0.2],
+      "veinContrast": 0.18
+    }
+  },
+
+  "veins": {
+    "primary": {
+      "visible": true,
+      "prominence": 0.25,
+      "width": 0.008,
+      "color": [0.2, 0.35, 0.2],
+      "glossiness": 0.4
+    },
+    "secondary": {
+      "count": 10,
+      "angle": 42,
+      "curvature": 0.35,
+      "prominence": 0.15,
+      "width": 0.005,
+      "taper": 0.7,
+      "splitAlignment": true
+    },
+    "tertiary": {
+      "density": 0.6,
+      "prominence": 0.05,
+      "networkPattern": "reticulate"
+    }
+  },
+
+  "splits": {
+    "method": "radial-bilateral",
+    "distribution": "vein-aligned",
+    "cutDepth": 0.50,
+    "cutTaper": "exponential",
+    "taperExponent": 2.2,
+    "minLobeWidth": 0.12,
+    "maxLobeWidth": 0.22,
+    "lobeCount": [6, 10],
+    "lobeSeparation": 0.15,
+    "innerRadius": 0.40,
+    "outerRadius": 1.0,
+    "asymmetry": 0.08,
+    "microVariation": 0.05,
+    "smoothing": 0.4,
+    "angleFromMidrib": 42,
+    "startPosition": 0.25,
+    "depthVariation": 0.15
+  },
+
+  "fenestrations": {
+    "method": "vein-parallel",
+    "shape": "elongated-ellipse",
+    "orientation": "radial-outward",
+    "minDistance": 0.12,
+    "sizeVariation": 0.25,
+    "countPerLobe": [1, 2],
+    "alignmentAngle": 42,
+    "positionBias": 0.45,
+    "radiusStart": 0.30,
+    "radiusEnd": 0.70,
+    "elongationFactor": 3.5,
+    "roundness": 0.35,
+    "irregularity": 0.12,
+    "bilateralSymmetry": true,
+    "mirrorTolerance": 0.08,
+    "zoneStart": 0.25,
+    "zoneEnd": 0.70,
+    "veinOffset": 0.15,
+    "excludeMargin": 0.12
+  },
+
+  "cluster": {
+    "radius": 0.55,
+    "spiralTurn": 137.5,
+    "elevation": 0.25,
+    "staggerAngle": 0.40,
+    "stemLength": 0.40,
+    "stemCurvature": 0.20,
+    "stemThickness": 0.030,
+    "stemColor": [0.25, 0.40, 0.25]
+  },
+
+  "stem": {
+    "height": 1.9,
+    "radiusBase": 0.028,
+    "radiusTop": 0.016,
+    "radialSegs": 10,
+    "color": [0.23, 0.40, 0.25]
+  },
+
+  "petiole": {
+    "length": 0.95,
+    "radiusBase": 0.010,
+    "radiusTip": 0.006,
+    "curveOut": 0.35,
+    "curveUp": 0.15,
+    "twistDeg": 8,
+    "radialSegs": 8,
+    "tubeSegs": 24,
+    "color": [0.23, 0.40, 0.25]
+  },
+
+  "procedural": {
+    "edgeProfile": "heart-ovate",
+    "veinLayout": "pinnate",
+    "noiseMix": 0.20,
+    "growthStages": {
+      "juvenile": {
+        "fenestrationCount": 0,
+        "splitAmplitude": 0.0,
+        "splitCount": 0,
+        "size": 0.35
+      },
+      "intermediate": {
+        "fenestrationCount": 4,
+        "splitAmplitude": 0.50,
+        "splitCount": 5,
+        "size": 0.70
+      },
+      "mature": {
+        "fenestrationCount": 10,
+        "splitAmplitude": 0.85,
+        "splitCount": 10,
+        "size": 1.0
+      }
+    }
+  },
+
+  "material": {
+    "baseAlpha": 0.70,
+    "transmission": 0.45,
+    "transmissionRoughness": 0.1,
+    "translucency": 0.55,
+    "thickness": 0.002,
+    "ior": 1.45,
+    
+    "roughness": 0.15,
+    "metalness": 0.02,
+    
+    "clearcoat": 0.35,
+    "clearcoatRoughness": 0.10,
+    
+    "specular": 0.6,
+    "specularColor": [0.9, 0.95, 0.85],
+    "shininess": 60,
+    
+    "emissiveBase": 0.12,
+    "emissivePulse": 0.05,
+    "emissiveColor": [0.15, 0.25, 0.15],
+    
+    "fresnelStrength": 0.75,
+    "fresnelPower": 2.5,
+    "edgeGlowColor": [0.6, 0.9, 0.7],
+    "edgeGlowIntensity": 1.2,
+    
+    "backlightAmplification": 0.4,
+    "veinTransmissionBlock": 0.6,
+    "internalGlowColor": [0.4, 0.7, 0.4],
+    "internalGlowStrength": 1.5,
+    
+    "centerToEdgeGradient": true,
+    "gradientCenterColor": [0.2, 0.4, 0.2],
+    "gradientEdgeColor": [0.5, 0.8, 0.4],
+    "gradientStrength": 0.7,
+    
+    "uBacklight": 0.8,
+    "uVeinGloss": 0.85,
+    "uIridescence": 0.35,
+    
+    "normalStrength": 0.30,
+    "aoStrength": 0.40
+  },
+
+  "fx": {
+    "stardust": {
+      "enabled": true,
+      "count": 480,
+      "size": [1.2, 2.4]
+    },
+    "iridescence": 0.35
+  },
+
+  "mobile": {
+    "layers": 1,
+    "stardust": 240,
+    "transmission": 0.14,
+    "bloom": "low"
+  },
+
+  "physicalProperties": {
+    "flexibility": 0.35,
+    "weightPerArea": 0.08,
+    "dragCoefficient": 0.65,
+    "dampingFactor": 0.45
+  },
+
+  "healthThresholds": {
+    "critical": 200,
+    "stressed": 300,
+    "optimal": 350,
+    "overwatered": 500
+  },
+
+  "ageVariation": {
+    "enabled": true,
+    "youngLeaves": 0.25,
+    "matureLeaves": 0.60,
+    "oldLeaves": 0.15,
+    "yellowingFactor": 0.10,
+    "brownSpots": 0.05
+  },
+
+  "animationHints": {
+    "windResponse": 0.40,
+    "growthRate": 0.02,
+    "photoTropism": 0.25,
+    "gravitropism": 0.15
+  }
+}

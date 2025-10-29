@@ -47,6 +47,7 @@ function Home() {
   const [isTVMode, setIsTVMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [selectedSpecies, setSelectedSpecies] = useState('monstera'); // Toggle between species
 
   useEffect(() => {
     // Detect TV mode
@@ -217,6 +218,10 @@ function Home() {
     navigate(`/onboarding${isTVMode ? '?tv=1' : ''}`);
   };
 
+  const toggleSpecies = () => {
+    setSelectedSpecies(prev => prev === 'monstera' ? 'generic-plant' : 'monstera');
+  };
+
   if (loading) {
     return <div className="loading">Loading plant status...</div>;
   }
@@ -256,8 +261,16 @@ function Home() {
           <div className="plant-image-container">
             <PlantVisualization 
               moisture={lastReading?.soil_raw || 343}
-              species={plant?.species || 'pothos'}
+              species={selectedSpecies}
             />
+            {/* Species Toggle Button */}
+            <button 
+              className="species-toggle-button"
+              onClick={toggleSpecies}
+              title={`Switch to ${selectedSpecies === 'monstera' ? 'Generic Plant' : 'Monstera'}`}
+            >
+              {selectedSpecies === 'monstera' ? '🌿 Monstera' : '🌱 Generic'}
+            </button>
           </div>
         )}
 

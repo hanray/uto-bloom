@@ -1,6 +1,6 @@
 {
-  "id": "pothos",
-  "displayName": "Pothos (Devil's Ivy)",
+  "id": "generic-plant",
+  "displayName": "Generic Plant (Fallback)",
   "generator": "tree-geometry",
   
   "structure": {
@@ -28,10 +28,17 @@
   
   "leaves": {
     "type": "heart",
-    "count": 25,
+    "count": 12,
     "size": [0.15, 0.2],
     "scale": 17.0,
-    "scaleV": 10.0
+    "scaleV": 10.0,
+    "segmentsXY": [32, 8],
+    "sizeXY": [0.42, 0.56],
+    "layers": 3,
+    "layerOffset": 0.0025,
+    "curlAmp": 1.0,
+    "blueNoiseScale": 4.0,
+    "useCutMasks": false
   },
   
   "material": {
@@ -53,5 +60,11 @@
     "direction": "cascading",
     "supportNeeded": false,
     "droop": 0.4
+  },
+  
+  "cluster": {
+    "spiralAngle": 137.5,
+    "radius": 0.55,
+    "elevation": 0.06
   }
 }
