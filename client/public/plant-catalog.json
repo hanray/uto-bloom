@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "common_name": "Snake Plant",
+    "latin_name": "Sansevieria trifasciata",
+    "aliases": ["Mother-in-Law's Tongue", "Viper's Bowstring Hemp"],
+    "default_temp_range_c": [15, 29],
+    "light_pref": "low-to-bright-indirect",
+    "watering_style": "infrequent-deep",
+    "image_url": "https://images.pexels.com/photos/2123482/pexels-photo-2123482.jpeg?auto=compress&cs=tinysrgb&w=400"
+  },
+  {
+    "id": 2,
+    "common_name": "Pothos",
+    "latin_name": "Epipremnum aureum",
+    "aliases": ["Devil's Ivy", "Golden Pothos"],
+    "default_temp_range_c": [17, 30],
+    "light_pref": "low-to-medium-indirect",
+    "watering_style": "moderate",
+    "image_url": "https://images.pexels.com/photos/4503267/pexels-photo-4503267.jpeg?auto=compress&cs=tinysrgb&w=400"
+  },
+  {
+    "id": 3,
+    "common_name": "Monstera",
+    "latin_name": "Monstera deliciosa",
+    "aliases": ["Swiss Cheese Plant", "Split-leaf Philodendron"],
+    "default_temp_range_c": [18, 27],
+    "light_pref": "bright-indirect",
+    "watering_style": "moderate",
+    "image_url": "https://images.pexels.com/photos/3125195/pexels-photo-3125195.jpeg?auto=compress&cs=tinysrgb&w=400"
+  },
+  {
+    "id": 4,
+    "common_name": "Spider Plant",
+    "latin_name": "Chlorophytum comosum",
+    "aliases": ["Airplane Plant", "Ribbon Plant"],
+    "default_temp_range_c": [18, 32],
+    "light_pref": "bright-indirect",
+    "watering_style": "moderate",
+    "image_url": "https://images.unsplash.com/photo-1572688484438-313a6e50c333?w=400"
+  },
+  {
+    "id": 5,
+    "common_name": "Peace Lily",
+    "latin_name": "Spathiphyllum",
+    "aliases": ["White Sails"],
+    "default_temp_range_c": [18, 30],
+    "light_pref": "low-to-medium-indirect",
+    "watering_style": "consistent-moist",
+    "image_url": "https://images.unsplash.com/photo-1593691509543-c55fb32d8de5?w=400"
+  },
+  {
+    "id": 6,
+    "common_name": "Rubber Plant",
+    "latin_name": "Ficus elastica",
+    "aliases": ["Rubber Tree", "Rubber Fig"],
+    "default_temp_range_c": [15, 24],
+    "light_pref": "bright-indirect",
+    "watering_style": "moderate",
+    "image_url": "https://images.unsplash.com/photo-1602613903055-26b9e7c4a6bb?w=400"
+  },
+  {
+    "id": 7,
+    "common_name": "ZZ Plant",
+    "latin_name": "Zamioculcas zamiifolia",
+    "aliases": ["Zanzibar Gem", "Eternity Plant"],
+    "default_temp_range_c": [15, 26],
+    "light_pref": "low-to-bright-indirect",
+    "watering_style": "infrequent",
+    "image_url": "https://images.unsplash.com/photo-1632207691143-643e2a9a9361?w=400"
+  },
+  {
+    "id": 8,
+    "common_name": "Aloe Vera",
+    "latin_name": "Aloe barbadensis miller",
+    "aliases": ["Medicinal Aloe", "Burn Plant"],
+    "default_temp_range_c": [13, 27],
+    "light_pref": "bright-direct",
+    "watering_style": "infrequent-deep",
+    "image_url": "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=400"
+  },
+  {
+    "id": 9,
+    "common_name": "Fiddle Leaf Fig",
+    "latin_name": "Ficus lyrata",
+    "aliases": ["Banjo Fig"],
+    "default_temp_range_c": [18, 26],
+    "light_pref": "bright-indirect",
+    "watering_style": "moderate",
+    "image_url": "https://images.unsplash.com/photo-1545239705-1564e58b9e4a?w=400"
+  },
+  {
+    "id": 10,
+    "common_name": "Jade Plant",
+    "latin_name": "Crassula ovata",
+    "aliases": ["Money Plant", "Lucky Plant"],
+    "default_temp_range_c": [18, 24],
+    "light_pref": "bright-direct",
+    "watering_style": "infrequent",
+    "image_url": "https://images.unsplash.com/photo-1459156212016-c812468e2115?w=400"
+  }
+]

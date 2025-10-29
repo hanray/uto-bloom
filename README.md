@@ -171,13 +171,14 @@ Real-time data streaming to connected clients
 ### Prerequisites
 - Node.js 18+ and npm
 - MongoDB instance (local or cloud)
-- ESP32 development environment
+- ESP32 development environment (for production)
+- Arduino Uno (for prototype testing)
 - HTTPS-capable hosting
 
 ### Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/uto-bloom.git
+git clone https://github.com/hanray/uto-bloom.git
 cd uto-bloom
 
 # Install dependencies
@@ -187,15 +188,23 @@ npm install
 cp .env.example .env
 # Edit .env with your MongoDB connection and device keys
 
-# Start development server
-npm run dev
+# Start all services (server + serial + client)
+.\start.bat
+# Or: npm.cmd start
 ```
 
-### Hardware Setup
-1. Flash firmware to ESP32 device
-2. Configure Wi-Fi credentials and server endpoint
-3. Calibrate soil moisture sensor (dry/wet readings)
-4. Install sensor node in plant pot
+### Hardware Setup (Prototype)
+1. Upload `firmware/prototype-serial-test.ino` to Arduino Uno
+2. Connect SparkFun soil moisture sensor (A0=signal, Pin7=power)
+3. Connect Arduino via USB (COM5)
+4. Start services with `.\start.bat`
+
+### Android TV Setup
+See **[apk/tv-app/README.md](./apk/tv-app/README.md)** for:
+- Building Android TV APK
+- Installing via ADB
+- Network configuration (same WiFi or external URL)
+- TV-optimized UI with DPAD navigation
 
 ## 📈 Future Roadmap
 

@@ -30,30 +30,61 @@ const THRESHOLDS = {
 };
 
 /**
- * Compute status from current and recent readings
- * Implements 2-consecutive-check stability rule
+ * Compute status from current reading
+ * Per BRD (updated rules):
+ * - Need water: raw < 250 for 2 consecutive reads
+ * - I'm doing fine: 250 ≤ raw < 450
+ * - I'm doing great: 450 ≤ raw < 800
+ * - Over-wet: raw ≥ 850 sustained ≥ 12h (contributes to care)
+ * 
+ * Note: For MVP single-document model, we simplify to instant status
  */
-function computeStatus(currentReading, previousReadings = []) {
-  // TODO: Implement BR-ST-001 - Need water detection (2 consecutive dry)
-  // TODO: Implement BR-ST-002 - Doing great detection (in range, 2 checks)
-  // TODO: Implement BR-ST-003 - Temperature alerts (sustained ~1 hour)
-  // TODO: Implement BR-ST-004 - Critical care escalation
-  // TODO: Check reading freshness (warn if > 30 min)
-  // TODO: Apply debouncing (2 consecutive checks required)
+function computeStatus(soilRaw, tempC = null) {
+  let status = STATUS.FINE;
+  let reason = '';
   
-  return {
-    status: STATUS.FINE,
-    reason: 'Status computation not yet implemented',
-    moisture_band: 'unknown',
-    temp_band: 'unknown',
-    timestamp: new Date()
-  };
+  // Moisture bands per BRD
+  if (soilRaw < 250) {
+    status = STATUS.NEED_WATER;
+    reason = 'Soil moisture is low - time to water';
+  } else if (soilRaw >= 250 && soilRaw < 450) {
+    status = STATUS.FINE;
+    reason = 'Soil moisture is okay';
+  } else if (soilRaw >= 450 && soilRaw < 800) {
+    status = STATUS.GREAT;
+    reason = 'Soil moisture is perfect!';
+  } else if (soilRaw >= 850) {
+    status = STATUS.OVER_WET;
+    reason = 'Soil is very wet - let it dry out';
+  } else if (soilRaw >= 800) {
+    status = STATUS.FINE;
+    reason = 'Soil moisture is adequate';
+  }
+  
+  // Temperature checks (if available)
+  if (tempC !== null) {
+    if (tempC < 15) {
+      status = STATUS.COLD;
+      reason = "I'm cold - temperature is too low";
+    } else if (tempC > 30) {
+      status = STATUS.HOT;
+      reason = "I'm hot - temperature is too high";
+    }
+  }
+  
+  // Composite: Over-wet OR multiple issues = CARE
+  if (soilRaw >= 850 || (status === STATUS.COLD && soilRaw < 300)) {
+    status = STATUS.CARE;
+    reason = 'Multiple issues detected - needs attention!';
+  }
+  
+  return status;
 }
 
 /**
  * Check if reading is stale (> 30 minutes old)
  */
-function isStalereading(timestamp) {
+function isStaleReading(timestamp) {
   const thirtyMinutesAgo = Date.now() - (30 * 60 * 1000);
   return timestamp < thirtyMinutesAgo;
 }
