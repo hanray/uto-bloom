@@ -131,6 +131,28 @@ export function useAIAssistant(plantData, platform = 'desktop') {
 
     } catch (error) {
       console.error('❌ Failed to start AI:', error);
+      
+      // Report error to server for debugging
+      try {
+        await fetch('http://localhost:3000/api/client-error', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            error: {
+              message: error.message,
+              name: error.name,
+              stack: error.stack
+            },
+            context: `AI Assistant camera initialization (${platform})`,
+            userAgent: navigator.userAgent,
+            platform: platform,
+            timestamp: new Date().toISOString()
+          })
+        });
+      } catch (reportError) {
+        console.warn('Failed to report error to server:', reportError);
+      }
+      
       setAiStatus('error');
       
       // More helpful error message

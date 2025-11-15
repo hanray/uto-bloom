@@ -46,6 +46,23 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Uto Bloom server is running' });
 });
 
+// Client error logging endpoint
+app.post('/api/client-error', (req, res) => {
+  const { error, context, userAgent, platform, timestamp } = req.body;
+  
+  console.log('\n❌ ===== CLIENT ERROR DETECTED =====');
+  console.log(`📱 Platform: ${platform || 'unknown'}`);
+  console.log(`🌐 User Agent: ${userAgent || req.headers['user-agent']}`);
+  console.log(`⏰ Timestamp: ${timestamp || new Date().toISOString()}`);
+  console.log(`📍 Context: ${context || 'N/A'}`);
+  console.log(`🔴 Error Message: ${error?.message || error}`);
+  console.log(`📚 Error Name: ${error?.name || 'N/A'}`);
+  console.log(`📋 Error Stack: ${error?.stack || 'N/A'}`);
+  console.log('=====================================\n');
+  
+  res.json({ success: true, message: 'Error logged' });
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
@@ -56,7 +73,8 @@ app.get('/', (req, res) => {
       'GET /api/history',
       'GET /api/nodes/:id',
       'GET /health',
-      'POST /api/test/seed - Seed test data'
+      'POST /api/test/seed - Seed test data',
+      'POST /api/client-error - Log client errors'
     ]
   });
 });
