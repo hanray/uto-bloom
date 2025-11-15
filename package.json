@@ -10,9 +10,10 @@
     "server": "node server/index.js",
     "serial": "node scripts/serial-bridge.js",
     "client": "cd client && npm.cmd run dev",
+    "vision": "cd utovision-api && npm.cmd run dev",
     "serial:list": "node -e \"require('serialport').SerialPort.list().then(ports => ports.forEach(p => console.log(p.path, p.manufacturer)))\"",
-    "dev": "concurrently --names \"SERVER,SERIAL,CLIENT\" --prefix-colors \"green,yellow,cyan\" \"npm.cmd run server\" \"npm.cmd run serial COM5\" \"npm.cmd run client\"",
-    "start": "concurrently --names \"SERVER,SERIAL,CLIENT\" --prefix-colors \"green,yellow,cyan\" \"npm.cmd run server\" \"npm.cmd run serial COM5\" \"npm.cmd run client\""
+    "dev": "concurrently --names \"SERVER,SERIAL,CLIENT,VISION\" --prefix-colors \"green,yellow,cyan,magenta\" \"npm.cmd run server\" \"npm.cmd run serial COM5\" \"npm.cmd run client\" \"npm.cmd run vision\"",
+    "start": "concurrently --names \"SERVER,SERIAL,CLIENT,VISION\" --prefix-colors \"green,yellow,cyan,magenta\" \"npm.cmd run server\" \"npm.cmd run serial COM5\" \"npm.cmd run client\" \"npm.cmd run vision\""
   },
   "keywords": [],
   "author": "",

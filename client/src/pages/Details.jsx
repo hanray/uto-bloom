@@ -34,7 +34,22 @@ function Details() {
     }
   };
 
-  const props = { plant, details, loading, isTVMode };
+  const getStatusConfig = (status) => {
+    const configs = {
+      need_water: { emoji: '💧', text: "I'm in need of water.", color: '#ef4444' },
+      great: { emoji: '🌟', text: "I'm doing great!", color: '#10b981' },
+      fine: { emoji: '✅', text: "I'm doing fine.", color: '#3b82f6' },
+      cold: { emoji: '🥶', text: "I'm cold.", color: '#60a5fa' },
+      hot: { emoji: '🔥', text: "I'm hot.", color: '#f97316' },
+      care: { emoji: '🆘', text: "I'm in need of care!", color: '#dc2626' },
+      stale: { emoji: '⚠️', text: 'Connection lost.', color: '#6b7280' }
+    };
+    return configs[status] || { emoji: '❓', text: 'Unknown', color: '#9ca3af' };
+  };
+
+  const status = details?.status || 'unknown';
+  const statusConfig = getStatusConfig(status);
+  const props = { plant, details, loading, isTVMode, status, statusConfig };
 
   if (isMobile) return <DetailsMobile {...props} />;
   return <DetailsDesktop {...props} />;

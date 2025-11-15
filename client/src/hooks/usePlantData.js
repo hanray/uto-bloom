@@ -134,10 +134,11 @@ export function usePlantData() {
     if (isInitialLoad) return false;
     if (!lastReading?.last_seen) return true;
     
-    const thirtyMinsAgo = Date.now() - (30 * 60 * 1000);
+    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000); // Changed to 5 minutes for more accurate detection
     const lastSeenTime = new Date(lastReading.last_seen).getTime();
     
-    return lastSeenTime < thirtyMinsAgo;
+    // Only mark as stale if truly no data for 5 minutes
+    return lastSeenTime < fiveMinutesAgo;
   };
 
   const toggleSpecies = () => {

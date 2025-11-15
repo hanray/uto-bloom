@@ -50,6 +50,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: none; /* Hide default cursor for custom cursor */
 }
 
 body {
@@ -2072,11 +2073,12 @@ html, body {
   margin: 0;
 }
 
-/* METRICS COLUMN (Left) */
+/* METRICS COLUMN (Left) - Now with 4 tiles */
 .figma-metrics-column {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  flex: 1;
 }
 
 /* PLANT AREA (Right, larger) */
@@ -2088,6 +2090,7 @@ html, body {
   flex-direction: column;
   gap: 8px;
   height: 452px;
+  flex: 1;
 }
 
 .figma-plant-label {
@@ -2107,27 +2110,43 @@ html, body {
 
 .figma-metric-tile {
   width: 140px;
-  height: 136px;
-  padding: 20px;
+  height: 102px;
+  padding: 16px;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.figma-metric-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.figma-metric-tile:active {
+  transform: translateY(0);
 }
 
 /* COLORED TILES - Design System Spec */
+.figma-metric-tile.purple-tile {
+  background: hsl(258, 75%, 55%); /* Purple for AI */
+  box-shadow: 0px 4px 12px 0px rgba(124, 58, 237, 0.15);
+}
+
 .figma-metric-tile.blue-tile {
-  background: #2563eb; /* blue-600 */
+  background: hsl(217, 75%, 50%); /* Muted blue - was #2563eb */
   box-shadow: 0px 4px 12px 0px rgba(37, 99, 235, 0.15);
 }
 
 .figma-metric-tile.orange-tile {
-  background: #f97316; /* orange-500 */
+  background: hsl(23, 85%, 50%); /* Muted orange - was #f97316 */
   box-shadow: 0px 4px 12px 0px rgba(249, 115, 22, 0.15);
 }
 
 .figma-metric-tile.green-tile {
-  background: #22c55e; /* green-500 */
+  background: hsl(142, 65%, 45%); /* Muted green - was #22c55e */
   box-shadow: 0px 4px 12px 0px rgba(34, 197, 94, 0.15);
 }
 
@@ -2418,9 +2437,10 @@ html, body {
     linear-gradient(127.935deg, rgb(68, 68, 68) 0%, rgb(0, 0, 0) 100%);
   color: white;
   font-family: Arial, sans-serif;
-  padding-bottom: 0;
+  padding-bottom: 3rem;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Base gradient layer (always visible) */
@@ -2451,11 +2471,12 @@ html, body {
 }
 
 .figma-mobile-header {
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 1rem 1rem 1rem;
   background: rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .figma-back-btn {
@@ -2475,9 +2496,10 @@ html, body {
 }
 
 .figma-mobile-title-section {
-  padding: 1rem;
+  padding: 1.25rem 1.5rem;
   background: rgba(255,255,255,0.05);
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .figma-mobile-title {
@@ -2494,8 +2516,8 @@ html, body {
 
 .figma-mobile-content {
   flex: 1;
-  padding: 1.5rem;
-  overflow-y: auto;
+  padding: 1.5rem 1.5rem 6rem 1.5rem;
+  overflow-y: visible;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -2592,7 +2614,7 @@ html, body {
 
 .figma-mobile-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
@@ -2606,6 +2628,17 @@ html, body {
   background: rgba(255, 255, 255, 0.05);
   min-height: 120px;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.figma-mobile-metric-tile:active {
+  transform: scale(0.95);
+}
+
+.figma-mobile-metric-tile.purple-tile {
+  background: hsl(258, 75%, 55%);
+  box-shadow: 0px 2px 12px 0px rgba(124, 58, 237, 0.2);
 }
 
 .figma-mobile-metric-tile.blue-shadow {
@@ -2640,17 +2673,17 @@ html, body {
 
 /* MOBILE METRIC TILE COLORS */
 .figma-mobile-metric-tile.blue-tile {
-  background: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%);
+  background: linear-gradient(135deg, hsl(217, 75%, 55%) 0%, hsl(217, 75%, 50%) 100%);
   box-shadow: 0px 4px 16px 0px rgba(59, 130, 246, 0.4);
 }
 
 .figma-mobile-metric-tile.orange-tile {
-  background: linear-gradient(135deg, rgb(251, 146, 60) 0%, rgb(249, 115, 22) 100%);
+  background: linear-gradient(135deg, hsl(23, 85%, 55%) 0%, hsl(23, 85%, 50%) 100%);
   box-shadow: 0px 4px 16px 0px rgba(251, 146, 60, 0.4);
 }
 
 .figma-mobile-metric-tile.green-tile {
-  background: linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(22, 163, 74) 100%);
+  background: linear-gradient(135deg, hsl(142, 65%, 48%) 0%, hsl(142, 65%, 45%) 100%);
   box-shadow: 0px 4px 16px 0px rgba(34, 197, 94, 0.4);
 }
 
@@ -3757,4 +3790,125 @@ html, body {
   .history-chart-wrapper {
     height: 500px;
   }
+}
+
+/* ========================================
+   AI ASSISTANT COMPONENTS
+   ======================================== */
+
+/* AI Status Indicator (replaces static timestamp) */
+.ai-status-indicator {
+  font-size: 0.85rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.ai-status-indicator.idle {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ai-status-indicator.connecting {
+  color: #f59e0b;
+}
+
+.ai-status-indicator.active {
+  color: #10b981;
+}
+
+.ai-status-indicator.error {
+  color: #ef4444;
+}
+
+.ai-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ai-status-indicator.connecting .ai-status-dot {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* AI Responses Feed - Full Width Tile */
+.ai-responses-container {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  position: relative;
+}
+
+.ai-responses-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.ai-responses-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.ai-responses-close:active {
+  transform: scale(0.9);
+}
+
+.ai-responses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-responses-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-responses-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(124, 58, 237, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+/* Hidden video element for camera */
+.ai-video-hidden {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
 }

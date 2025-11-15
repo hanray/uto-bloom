@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Details from './pages/Details'
 import History from './pages/History'
 import Onboarding from './pages/Onboarding'
+import { CustomCursor } from './components/CustomCursor'
 import './App.css'
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <CustomCursor />
       <div className="app">
         <Routes>
           <Route 

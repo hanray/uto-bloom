@@ -3,7 +3,7 @@ import logo from '../../icons/uto-labs-logo4x.png';
 import StatusIndicator from '../../components/StatusIndicator';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
-function DetailsMobile({ plant, details, loading }) {
+function DetailsMobile({ plant, details, loading, status, statusConfig }) {
   if (loading) {
     return <LoadingSpinner fullScreen text="Loading details..." />;
   }
@@ -36,7 +36,7 @@ function DetailsMobile({ plant, details, loading }) {
               <h3 className="details-card-title">Current Status</h3>
             </div>
             <div className="details-card-content">
-              <StatusIndicator state={details?.status || 'unknown'} />
+              <StatusIndicator status={status} statusConfig={statusConfig} />
             </div>
           </div>
 

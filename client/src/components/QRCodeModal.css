@@ -1,0 +1,131 @@
+.qr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.qr-modal-content {
+  background: #1f2129;
+  border: 1px solid #374151;
+  border-radius: 24px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.qr-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.qr-modal-close:hover {
+  color: #fff;
+}
+
+.qr-modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.qr-modal-logo {
+  width: 64px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.qr-modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.qr-modal-subtitle {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.qr-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.qr-modal-canvas {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.qr-modal-instruction {
+  font-size: 0.875rem;
+  color: #d1d5db;
+  text-align: center;
+  margin: 0;
+  max-width: 300px;
+}
+
+.qr-modal-url {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.qr-modal-url code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #a78bfa;
+  word-break: break-all;
+}
+
+.qr-modal-button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #7c3aed;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.2s;
+}
+
+.qr-modal-button:hover {
+  background: #6d28d9;
+}
+
+.qr-modal-button:active {
+  background: #5b21b6;
+}

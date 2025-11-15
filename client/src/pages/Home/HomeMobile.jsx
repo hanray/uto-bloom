@@ -5,12 +5,28 @@ import MobileMenu from '../../components/MobileMenu';
 import logo from '../../icons/uto-labs-logo4x.png';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import StatusIndicator from '../../components/StatusIndicator';
+import QRCodeModal from '../../components/QRCodeModal';
+import AIResponsesFeed from '../../components/AIResponsesFeed';
+import { useAIAssistant } from '../../hooks/useAIAssistant';
 
 /**
  * MOBILE LAYOUT - Single column stacked design with slide-out menu
  * Adapted from Figma design for mobile viewport
  */
-function HomeMobile({ plant, status, lastReading, chartData, loading, statusConfig }) {
+function HomeMobile({ plant, status, lastReading, loading, statusConfig }) {
+  const plantData = { plant, status, lastReading };
+  const { aiStatus, hasCamera, responses, showQR, videoRef, startAI, stopAI, toggleQR, clearResponses } = useAIAssistant(plantData, 'mobile');
+  
+  const qrUrl = `${window.location.origin}/ai-assistant?plant=pot-01`;
+
+  const handleAIClick = () => {
+    if (aiStatus === 'idle') {
+      startAI();
+    } else if (aiStatus === 'active') {
+      stopAI();
+    }
+  };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -85,14 +101,18 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
           statusConfig={statusConfig}
           className="status-indicator--mobile"
         />
-        <p className="figma-mobile-timestamp">
-          Last updated {lastReading?.last_seen 
+        <p className={`ai-status-indicator ${aiStatus}`} style={{ textAlign: 'center' }}>
+          <span className="ai-status-dot"></span>
+          {aiStatus === 'idle' && `Last updated ${lastReading?.last_seen 
               ? new Date(lastReading.last_seen).toLocaleTimeString('en-US', {
                   hour: 'numeric',
                   minute: '2-digit',
                   hour12: true
                 })
-              : '09:24 PM'}
+              : '09:24 PM'}`}
+          {aiStatus === 'connecting' && 'AI Assistant connecting...'}
+          {aiStatus === 'active' && 'AI Assistant active • Analyzing'}
+          {aiStatus === 'error' && 'AI error • Check permissions'}
         </p>
 
         {/* Metrics Grid */}
@@ -108,6 +128,14 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
 
         {/* Metrics Grid */}
         <div className="figma-mobile-metrics">
+          <div className="figma-mobile-metric-tile purple-tile" onClick={handleAIClick} style={{ cursor: 'pointer' }}>
+            <div className="figma-mobile-metric-icon">✨</div>
+            <p className="figma-mobile-metric-label">AI Assistant</p>
+            <p className="figma-mobile-metric-value" style={{ fontSize: '0.75rem' }}>
+              {aiStatus === 'idle' ? 'Tap' : aiStatus === 'active' ? 'Active' : aiStatus}
+            </p>
+          </div>
+
           <div className="figma-mobile-metric-tile blue-tile">
             <div className="figma-mobile-metric-icon">💧</div>
             <p className="figma-mobile-metric-label">Moisture</p>
@@ -165,7 +193,25 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
             </div>
           </Link>
         </div>
+
+        {/* AI RESPONSES FEED */}
+        {responses.length > 0 && (
+          <div className="ai-responses-container">
+            <button className="ai-responses-close" onClick={clearResponses}>×</button>
+            <div className="ai-responses-header">
+              <h3 className="ai-responses-title">🤖 AI Insights</h3>
+              <span className="ai-responses-count">{responses.length}/10</span>
+            </div>
+            <AIResponsesFeed responses={responses} />
+          </div>
+        )}
       </div>
+
+      {/* Hidden video element for camera */}
+      <video ref={videoRef} className="ai-video-hidden" playsInline />
+
+      {/* QR Code Modal */}
+      <QRCodeModal isOpen={showQR} onClose={toggleQR} url={qrUrl} />
     </div>
   );
 }

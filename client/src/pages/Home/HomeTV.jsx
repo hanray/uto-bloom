@@ -5,12 +5,28 @@ import PlantVisualization from '../../components/PlantVisualization';
 import { HomeIcon, HistoryIcon, DetailsIcon, SettingsIcon } from '../../components/NavIcon';
 import logo from '../../icons/uto-labs-logo4x.png';
 import StatusIndicator from '../../components/StatusIndicator';
+import QRCodeModal from '../../components/QRCodeModal';
+import AIResponsesFeed from '../../components/AIResponsesFeed';
+import { useAIAssistant } from '../../hooks/useAIAssistant';
 
 /**
  * TV LAYOUT - Identical visual to Desktop but with D-pad navigation
  * Same Figma design (node 32-804) + focus management for ALL content
  */
 function HomeTV({ plant, status, lastReading, chartData, loading, statusConfig }) {
+  const plantData = { plant, status, lastReading };
+  const { aiStatus, hasCamera, responses, showQR, videoRef, startAI, stopAI, toggleQR, clearResponses } = useAIAssistant(plantData, 'tv');
+  
+  const qrUrl = `${window.location.origin}/ai-assistant?plant=pot-01`;
+
+  const handleAIClick = () => {
+    if (aiStatus === 'idle') {
+      startAI();
+    } else if (aiStatus === 'active') {
+      stopAI();
+    }
+  };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -180,8 +196,27 @@ function HomeTV({ plant, status, lastReading, chartData, loading, statusConfig }
 
           {/* METRICS + PLANT SECTION */}
           <div className="figma-metrics-plant-container">
-            {/* 3 COLORED Metric Tiles - Left Column - ALL FOCUSABLE */}
+            {/* 4 COLORED Metric Tiles - Left Column - ALL FOCUSABLE */}
             <div className="figma-metrics-column">
+              {/* PURPLE AI Assistant Tile */}
+              <div 
+                className="figma-metric-tile purple-tile" 
+                tabIndex={0}
+                onClick={handleAIClick}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="figma-metric-icon-circle">
+                  <span className="figma-metric-icon">✨</span>
+                </div>
+                <p className="figma-metric-label">AI Assistant</p>
+                <p className="figma-metric-value" style={{ fontSize: '0.75rem' }}>
+                  {aiStatus === 'idle' && 'Press to start'}
+                  {aiStatus === 'connecting' && 'Starting...'}
+                  {aiStatus === 'active' && 'Active'}
+                  {aiStatus === 'error' && 'Error'}
+                </p>
+              </div>
+
               {/* BLUE Moisture Tile */}
               <div className="figma-metric-tile blue-tile" tabIndex={0}>
                 <div className="figma-metric-icon-circle">
@@ -264,8 +299,28 @@ function HomeTV({ plant, status, lastReading, chartData, loading, statusConfig }
               <p className="figma-action-sublabel">View trends</p>
             </Link>
           </div>
+
+          {/* AI RESPONSES FEED - Full Width Row */}
+          {responses.length > 0 && (
+            <div className="content-full ai-responses-container" tabIndex={0}>
+              <button className="ai-responses-close" onClick={clearResponses}>×</button>
+              <div className="ai-responses-header">
+                <h3 className="ai-responses-title">
+                  🤖 AI Assistant Insights
+                </h3>
+                <span className="ai-responses-count">{responses.length}/10</span>
+              </div>
+              <AIResponsesFeed responses={responses} />
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Hidden video element for camera */}
+      <video ref={videoRef} className="ai-video-hidden" playsInline />
+
+      {/* QR Code Modal */}
+      <QRCodeModal isOpen={showQR} onClose={toggleQR} url={qrUrl} />
     </div>
   );
 }

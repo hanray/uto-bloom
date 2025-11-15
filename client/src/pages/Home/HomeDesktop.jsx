@@ -4,6 +4,9 @@ import PlantVisualization from '../../components/PlantVisualization';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import StatusIndicator from '../../components/StatusIndicator';
 import { HomeIcon, HistoryIcon, DetailsIcon, SettingsIcon } from '../../components/NavIcon';
+import QRCodeModal from '../../components/QRCodeModal';
+import AIResponsesFeed from '../../components/AIResponsesFeed';
+import { useAIAssistant } from '../../hooks/useAIAssistant';
 import logo from '../../icons/uto-labs-logo4x.png';
 
 /**
@@ -15,6 +18,19 @@ import logo from '../../icons/uto-labs-logo4x.png';
  * - Bottom: Purple "Health" tile + Gray chart tile with animated bubbles + Cyan "History" tile
  */
 function HomeDesktop({ plant, status, lastReading, chartData, loading, statusConfig }) {
+  const plantData = { plant, status, lastReading };
+  const { aiStatus, hasCamera, responses, showQR, videoRef, startAI, stopAI, toggleQR, clearResponses } = useAIAssistant(plantData, 'desktop');
+  
+  const qrUrl = `${window.location.origin}/ai-assistant?plant=pot-01`;
+
+  const handleAIClick = () => {
+    if (aiStatus === 'idle') {
+      startAI();
+    } else if (aiStatus === 'active') {
+      stopAI();
+    }
+  };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -86,14 +102,18 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
               {plant?.common_name || 'Monstera'} • Active
             </span>
           </div>
-          <div className="figma-timestamp">
-            Last updated {lastReading?.last_seen 
+          <div className={`ai-status-indicator ${aiStatus}`}>
+            <span className="ai-status-dot"></span>
+            {aiStatus === 'idle' && `Last updated ${lastReading?.last_seen 
               ? new Date(lastReading.last_seen).toLocaleTimeString('en-US', {
                   hour: 'numeric',
                   minute: '2-digit',
                   hour12: true
                 })
-              : '09:24 PM'}
+              : '09:24 PM'}`}
+            {aiStatus === 'connecting' && 'AI Assistant connecting...'}
+            {aiStatus === 'active' && 'AI Assistant active • Analyzing plant'}
+            {aiStatus === 'error' && 'AI Assistant error • Check permissions'}
           </div>
         </header>
 
@@ -107,8 +127,22 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
 
         {/* METRICS + PLANT SECTION */}
         <div className="content-full figma-metrics-plant-container">
-          {/* 3 COLORED Metric Tiles - Left Column */}
+          {/* 4 COLORED Metric Tiles - Left Column */}
           <div className="figma-metrics-column">
+            {/* PURPLE AI Assistant Tile */}
+            <div className="figma-metric-tile purple-tile" onClick={handleAIClick} style={{ cursor: 'pointer' }}>
+              <div className="figma-metric-icon-circle">
+                <span className="figma-metric-icon">✨</span>
+              </div>
+              <p className="figma-metric-label">AI Assistant</p>
+              <p className="figma-metric-value" style={{ fontSize: '0.75rem' }}>
+                {aiStatus === 'idle' && 'Click to start'}
+                {aiStatus === 'connecting' && 'Starting...'}
+                {aiStatus === 'active' && 'Active'}
+                {aiStatus === 'error' && 'Error'}
+              </p>
+            </div>
+
             {/* BLUE Moisture Tile */}
             <div className="figma-metric-tile blue-tile">
               <div className="figma-metric-icon-circle">
@@ -153,6 +187,20 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
             </div>
           </div>
         </div>
+
+        {/* AI RESPONSES FEED - Full Width Row */}
+        {responses.length > 0 && (
+          <div className="content-full ai-responses-container">
+            <button className="ai-responses-close" onClick={clearResponses}>×</button>
+            <div className="ai-responses-header">
+              <h3 className="ai-responses-title">
+                🤖 AI Assistant Insights
+              </h3>
+              <span className="ai-responses-count">{responses.length}/10</span>
+            </div>
+            <AIResponsesFeed responses={responses} />
+          </div>
+        )}
 
         {/* BOTTOM SECTION - Purple Health + Chart + Cyan History */}
         <div className="content-full figma-bottom-container">
@@ -204,6 +252,12 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
       <footer className="app-footer">
         <img src={logo} alt="Uto Labs" className="figma-logo" />
       </footer>
+
+      {/* Hidden video element for camera */}
+      <video ref={videoRef} className="ai-video-hidden" playsInline />
+
+      {/* QR Code Modal */}
+      <QRCodeModal isOpen={showQR} onClose={toggleQR} url={qrUrl} />
     </div>
   );
 }

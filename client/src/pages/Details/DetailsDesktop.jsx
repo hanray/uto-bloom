@@ -3,7 +3,7 @@ import logo from '../../icons/uto-labs-logo4x.png';
 import StatusIndicator from '../../components/StatusIndicator';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
-function DetailsDesktop({ plant, details, loading, isTVMode = false }) {
+function DetailsDesktop({ plant, details, loading, isTVMode = false, status, statusConfig }) {
   const navigate = useNavigate();
 
   if (loading) {
@@ -38,7 +38,7 @@ function DetailsDesktop({ plant, details, loading, isTVMode = false }) {
               <h3 className="details-card-title">Current Status</h3>
             </div>
             <div className="details-card-content">
-              <StatusIndicator state={details?.status || 'unknown'} />
+              <StatusIndicator status={status} statusConfig={statusConfig} />
             </div>
           </div>
 
