@@ -21,6 +21,10 @@ async function startServer() {
     const db = client.db('uto_bloom');
     console.log('✅ Connected to MongoDB');
     
+    // Setup database indexes
+    const { setupIndexes } = require('./src/services/db-setup');
+    await setupIndexes(db);
+    
     // Make db available to routes
     app.use((req, res, next) => {
       req.db = db;
@@ -96,11 +100,40 @@ const { setupLiveStream } = require('./src/routes/live');
 
 // Start server - bind to 0.0.0.0 to accept connections from all network interfaces
 const HOST = '0.0.0.0'; // Allows connections from TV on same WiFi
+
+// Get local network IP address
+const os = require('os');
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Skip internal and non-IPv4 addresses
+      if (iface.family === 'IPv4' && !iface.internal) {
+        // Prefer 10.88.111.x subnet
+        if (iface.address.startsWith('10.88.111.')) {
+          return iface.address;
+        }
+      }
+    }
+  }
+  // Fallback: return any non-internal IPv4
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+}
+
+const LOCAL_IP = getLocalIP();
+
 const server = app.listen(PORT, HOST, () => {
   console.log(`🌱 Uto Bloom server running on ${HOST}:${PORT}`);
   console.log(`📡 Local access: http://localhost:${PORT}/health`);
-  console.log(`📺 TV access: http://10.88.111.7:${PORT}/health`);
-  console.log(`📚 API docs: http://10.88.111.7:${PORT}/`);
+  console.log(`📺 Network access: http://${LOCAL_IP}:${PORT}/health`);
+  console.log(`📚 API docs: http://${LOCAL_IP}:${PORT}/`);
 });
 
 // Attach WebSocket to server
@@ -108,7 +141,7 @@ const wss = setupLiveStream(server);
 app.set('wss', wss);
 console.log(`🔴 WebSocket server ready`);
 console.log(`   Local: ws://localhost:${PORT}/live`);
-console.log(`   TV: ws://10.88.111.7:${PORT}/live`);
+console.log(`   Network: ws://${LOCAL_IP}:${PORT}/live`);
 
   } catch (err) {
     console.error('❌ MongoDB connection error:', err);

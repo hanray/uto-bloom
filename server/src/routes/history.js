@@ -6,12 +6,8 @@ const router = express.Router();
 
 /**
  * GET /history
- * Retrieve historical readings for a device
+ * Retrieve historical readings for a device from the readings collection
  * Query params: device_id, range (24h or 7d)
- * 
- * NOTE: Per BRD, we use single-document model (no history collection)
- * For MVP, we generate mock historical data points
- * In production, you'd create a separate readings collection
  */
 router.get('/history', async (req, res) => {
   try {
@@ -31,44 +27,35 @@ router.get('/history', async (req, res) => {
       });
     }
     
-    // Get current node state
-    const nodes = req.db.collection('nodes');
-    const node = await nodes.findOne({ _id: device_id });
-    
-    if (!node) {
-      return res.status(404).json({
-        success: false,
-        error: 'Node not found'
-      });
-    }
-    
-    // Generate mock history based on current reading
-    // In production, query actual readings collection
+    // Query actual readings from database
     const now = Math.floor(Date.now() / 1000);
     const hoursBack = range === '24h' ? 24 : 168;
-    const intervalMinutes = range === '24h' ? 15 : 60;
-    const readings = [];
+    const startTs = now - (hoursBack * 3600);
     
-    const currentValue = node.soil_raw || 500;
+    const readingsCollection = req.db.collection('readings');
+    const readingsQuery = await readingsCollection
+      .find({ 
+        device_id, 
+        ts: { $gte: startTs, $lte: now } 
+      })
+      .sort({ ts: 1 })
+      .toArray();
     
-    for (let i = hoursBack * 60; i >= 0; i -= intervalMinutes) {
-      const ts = now - (i * 60);
-      // Add some variation around current value
-      const variance = Math.random() * 100 - 50;
-      const value = Math.max(0, Math.min(1023, currentValue + variance));
-      
-      readings.push({
-        ts,
-        soil_raw: Math.round(value),
-        temp_c: node.temp_c || 22
-      });
-    }
+    // Format readings for response
+    const readings = readingsQuery.map(r => ({
+      ts: r.ts,
+      soil_raw: r.soil_raw,
+      temp_c: r.temp_c,
+      status: r.status
+    }));
+    
+    console.log(`📊 History query: ${readings.length} readings for ${device_id} (${range})`);
     
     res.status(200).json({ 
       device_id,
       range,
-      readings,
-      note: 'Mock data - implement readings collection for production'
+      count: readings.length,
+      readings
     });
   } catch (error) {
     console.error('History error:', error);

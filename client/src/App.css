@@ -12,6 +12,21 @@
   font-size: 16px;
 }
 
+/* Mobile Phone Profile - Base (iPhone SE, small Android phones) */
+@media (max-width: 375px) {
+  :root { font-size: 14px; }
+}
+
+/* Mobile Phone Profile - Standard (Most modern phones including Samsung S24) */
+@media (min-width: 376px) and (max-width: 844px) {
+  :root { font-size: 15px; }
+}
+
+/* Tablet Profile */
+@media (min-width: 845px) and (max-width: 1199px) {
+  :root { font-size: 16px; }
+}
+
 @media (min-width: 1200px) {
   :root { font-size: 18px; }
 }
@@ -129,25 +144,9 @@ html, body {
   color: #666;
 }
 
-.onboarding-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: transparent;
-  padding: 2.5rem;
-  position: relative;
-  z-index: 1;
-}
+/* Removed old .onboarding-page centering - now uses app-layout grid */
 
-.onboarding-page h1 {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  color: var(--black);
-  text-align: center;
-}
+/* Removed .onboarding-page h1 rule - now using .figma-title */
 
 .search-container {
   width: 100%;
@@ -220,6 +219,97 @@ html, body {
   font-size: 0.875rem;
   color: #666;
   font-style: italic;
+}
+
+/* NEW ONBOARDING - CENTERED LAYOUT */
+.onboarding-centered-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 120px; /* Account for sidebar */
+}
+
+.onboarding-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.onboarding-title {
+  font-size: 24px;
+  line-height: 36px;
+  color: #6898ff;
+  margin: 0;
+  font-weight: normal;
+  text-align: center;
+}
+
+.onboarding-subtitle {
+  font-size: 16px;
+  line-height: 24px;
+  color: white;
+  margin: 0;
+  text-align: center;
+}
+
+.onboarding-logo {
+  margin-top: 40px;
+  max-width: 120px;
+}
+
+/* OLD ONBOARDING RESULTS - Vertical List */
+.onboarding-results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
+
+.onboarding-plant-card {
+  background: #2a2d3a;
+  border: 1px solid #4b5563;
+  border-radius: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.onboarding-plant-card:hover {
+  background: #333644;
+  border-color: #60a5fa;
+  transform: translateX(4px);
+}
+
+.onboarding-plant-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #ffffff;
+}
+
+.onboarding-plant-card .latin-name {
+  font-size: 14px;
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+}
+
+.onboarding-plant-card.tv-selected {
+  outline: 3px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  background: #3b82f6;
+  border-color: #ffd700;
 }
 
 .onboarding-page .logo {
@@ -470,6 +560,11 @@ html, body {
   margin: 0 auto;
   padding: 3.75rem 1.5rem;
   min-height: 100vh;
+}
+
+/* Home Metro layout: allow wider content area */
+.home-metro .main-content {
+  max-width: 72rem; /* 1152px */
 }
 
 /* TV mode main-content must fit viewport */
@@ -789,13 +884,7 @@ html, body {
   padding-top: 5rem;
 }
 
-.details-page h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  color: var(--black);
-  text-align: center;
-}
+/* Removed .details-page h1 rule - now using .figma-title */
 
 .status-explanation {
   font-size: 1rem;
@@ -821,6 +910,31 @@ html, body {
   font-weight: 600;
   margin-bottom: 1rem;
   color: var(--black);
+}
+
+/* Design System - Simple Text Details (no cards) */
+.details-text-section {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.details-text-section h2 {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #ffffff;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.details-text-item {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: #9ca3af;
+  margin: 4px 0;
 }
 
 .details-grid {
@@ -1153,4 +1267,2494 @@ html, body {
   border-width: 3px;
 }
 
+/* ============================================
+   MOBILE PHONE PROFILE (Samsung S24, iPhone, etc.)
+   ============================================ */
 
+/* Mobile: Reduce spacing and optimize for vertical scrolling */
+@media (max-width: 844px) {
+  /* Main content adjustments */
+  .main-content {
+    padding: 2rem 1rem;
+    max-width: 100%;
+  }
+
+  /* Navigation sidebar - make it bottom navigation on mobile */
+  .nav-sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 0;
+    padding: 0.75rem 0.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid #E5E5E5;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .nav-item {
+    width: auto;
+    height: 2.5rem;
+    padding: 0.5rem 1rem;
+    gap: 0.5rem;
+    flex: 1;
+    max-width: 5rem;
+    justify-content: center;
+  }
+
+  .nav-item span {
+    display: none; /* Hide text labels on mobile bottom nav */
+  }
+
+  .nav-item img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* Plant badge - move to top right */
+  .plant-badge {
+    top: 1rem;
+    left: auto;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .nav-plant-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.5rem;
+  }
+
+  /* Headings */
+  .main-content h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Stats grid - make it vertical on small screens */
+  .stats-grid {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .stat-item {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+  }
+
+  .stat-value {
+    font-size: 1.125rem;
+  }
+
+  /* Chart cards */
+  .chart-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .chart-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .chart-card canvas {
+    height: 12rem !important;
+  }
+
+  .chart-wrapper {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  /* Plant image */
+  .plant-image-container {
+    min-height: 250px;
+    margin-bottom: 1rem;
+  }
+
+  .plant-image {
+    max-height: 15rem;
+  }
+
+  /* Species toggle button */
+  .species-toggle-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    bottom: 10px;
+    right: 10px;
+  }
+
+  /* Onboarding page */
+  .onboarding-page {
+    padding: 1.5rem;
+  }
+
+  .onboarding-page h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-container {
+    max-width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  .plant-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 5rem; /* Space for bottom nav */
+  }
+
+  /* Details page */
+  .details-page h1 {
+    font-size: 1.5rem;
+  }
+
+  .details-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .details-section h2 {
+    font-size: 1.125rem;
+  }
+
+  .detail-item {
+    padding: 0.75rem;
+  }
+
+  /* History page */
+  .range-selector {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .range-button {
+    font-size: 0.9rem;
+  }
+
+  /* App name */
+  .app-name {
+    bottom: 4.5rem; /* Above bottom nav */
+    left: 1rem;
+    font-size: 0.75rem;
+  }
+
+  /* Add bottom padding to pages for bottom nav */
+  .home-page,
+  .details-page,
+  .history-page {
+    padding-bottom: 5rem;
+  }
+
+  .main-content {
+    padding-bottom: 5rem;
+  }
+
+  /* Logo */
+  .logo {
+    width: 4rem;
+  }
+}
+
+/* ======================
+   Metro Dashboard Layout
+   ====================== */
+.metro-grid {
+  display: grid;
+  grid-template-columns: 20rem 1fr;
+  gap: 1rem;
+  width: 100%;
+  align-items: stretch;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 1200px) {
+  .metro-grid { gap: 1.5rem; grid-template-columns: 22rem 1fr; }
+}
+
+@media (max-width: 900px) {
+  .metro-grid { grid-template-columns: 1fr; }
+}
+
+.tile {
+  background: rgba(255,255,255,0.75);
+  border: 1px solid var(--purple-15);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 0.5rem 2rem var(--purple-08), 0 0.125rem 0.5rem rgba(0,0,0,0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.metrics-column {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.metric-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.plant-tile {
+  position: relative;
+  padding: 0.5rem; /* inner padding, canvas has its own radius */
+  display: flex;
+  align-items: stretch;
+}
+
+.chart-tile { margin-top: 1rem; }
+
+/* TV mode sizing tweaks */
+.tv-mode .plant-tile { min-height: 70vh; }
+.tv-mode .metro-grid { gap: 1rem; }
+
+/* Extra small phones (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .main-content h1 {
+    font-size: 1.75rem;
+  }
+
+  .stats-grid {
+    gap: 1rem;
+  }
+
+  .chart-card canvas {
+    height: 10rem !important;
+  }
+
+  .plant-image {
+    max-height: 12rem;
+  }
+
+  .nav-item {
+    padding: 0.5rem;
+    max-width: 4rem;
+  }
+
+  .plant-badge {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .species-toggle-button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ======================
+   Metro Dashboard Layout
+   ====================== */
+.metro-grid {
+  display: grid;
+  grid-template-columns: 20rem 1fr;
+  gap: 1rem;
+  width: 100%;
+  align-items: stretch;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 1200px) {
+  .metro-grid { gap: 1.5rem; grid-template-columns: 22rem 1fr; }
+}
+
+@media (max-width: 900px) {
+  .metro-grid { grid-template-columns: 1fr; }
+}
+
+.tile {
+  background: rgba(255,255,255,0.75);
+  border: 1px solid var(--purple-15);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 0.5rem 2rem var(--purple-08), 0 0.125rem 0.5rem rgba(0,0,0,0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.metrics-column {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.metric-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.metric-status {
+  font-size: 2rem;
+}
+
+.plant-tile {
+  position: relative;
+  padding: 0.5rem;
+  display: flex;
+  align-items: stretch;
+}
+
+.chart-tile { 
+  margin-top: 1rem; 
+}
+
+/* Home Metro: allow wider content area */
+.home-metro .main-content {
+  max-width: 72rem; /* 1152px */
+}
+
+/* TV mode sizing tweaks */
+.tv-mode .plant-tile { 
+  min-height: 70vh; 
+}
+
+.tv-mode .metro-grid { 
+  gap: 1rem; 
+}
+
+/* ======================
+   Mobile-Specific Layout
+   ====================== */
+.home-mobile {
+  padding-bottom: 5rem; /* Space for bottom nav */
+}
+
+.home-mobile .main-content {
+  padding: 2rem 1rem;
+  padding-bottom: 5rem;
+}
+
+.mobile-plant-badge {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+}
+
+.mobile-plant-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.mobile-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(255,255,255,0.75);
+  border: 1px solid var(--purple-15);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.stat-card .stat-label {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.stat-card .stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.stat-emoji {
+  font-size: 1.75rem !important;
+}
+
+.mobile-chart-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.mobile-chart-wrapper .chart-card {
+  padding: 1rem;
+}
+
+.mobile-chart-wrapper .chart-card canvas {
+  height: 12rem !important;
+}
+
+.mobile-logo {
+  width: 4rem;
+  margin-top: 1.5rem;
+}
+
+/* Mobile Bottom Navigation */
+.mobile-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid #E5E5E5;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: #666;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.mobile-nav-item.active {
+  color: var(--purple);
+  background: var(--purple-05);
+}
+
+.mobile-nav-item img {
+  width: 1.5rem;
+  height: 1.5rem;
+  filter: brightness(0.5);
+  transition: filter 0.2s ease;
+}
+
+.mobile-nav-item.active img {
+  filter: brightness(0) saturate(100%) invert(25%) sepia(90%) saturate(3500%) hue-rotate(260deg);
+}
+
+.mobile-app-name {
+  position: fixed;
+  bottom: 4.5rem;
+  left: 1rem;
+}
+
+/* ============================================
+   FIGMA METRO UI - ACCURATE from node 32-804
+   ============================================ */
+
+/* DESKTOP/TV LAYOUT */
+.figma-desktop-layout {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  position: relative;
+  color: white;
+  font-family: Arial, sans-serif;
+  padding: 0 60px;
+  overflow: hidden;
+}
+
+/* Base gradient layer (always visible) */
+.figma-desktop-layout::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgb(45, 45, 50) 0%, rgb(20, 20, 25) 50%, rgb(0, 0, 0) 100%);
+  z-index: -3;
+}
+
+/* Animated light layer */
+.figma-desktop-layout::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.12), transparent 50%);
+  z-index: -2;
+  animation: lightShift 60s ease-in-out infinite;
+}
+
+@keyframes lightShift {
+  0%, 100% {
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15), transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.12), transparent 50%);
+  }
+  25% {
+    background: 
+      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.08), transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(251, 191, 36, 0.12), transparent 50%);
+  }
+  50% {
+    background: 
+      radial-gradient(circle at 80% 30%, rgba(251, 191, 36, 0.15), transparent 50%),
+      radial-gradient(circle at 20% 70%, rgba(255, 255, 255, 0.1), transparent 50%);
+  }
+  75% {
+    background: 
+      radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.12), transparent 50%),
+      radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.15), transparent 50%);
+  }
+}
+
+.figma-layout-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1400px;
+}
+
+/* TV MODE - Full screen, no centering */
+.figma-tv-mode.figma-desktop-layout {
+  display: flex;
+  place-items: unset;
+  padding: 0;
+}
+
+.figma-tv-mode .figma-layout-wrapper {
+  max-width: unset;
+}
+
+/* LEFT SIDEBAR - VERTICAL Pill Navigation - Design System Spec */
+.figma-sidebar-nav {
+  position: fixed;
+  left: 13px;
+  top: 139px; /* Original position for proper alignment */
+  width: 72px;
+  height: auto;
+  background: #3a3d4a; /* Design system spec */
+  border-radius: 24px; /* rounded-3xl */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 12px;
+  z-index: 100;
+}
+
+.figma-nav-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 100px;
+  background: #4a4d5a; /* Inactive state - design system */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: #9ca3af; /* gray-400 text */
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.figma-nav-btn.active {
+  background: white;
+  color: #111827; /* gray-900 text */
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.15);
+}
+
+.figma-nav-btn:hover,
+.figma-nav-btn:focus {
+  background: #555866; /* Hover state - design system */
+  color: #e5e7eb;
+  outline: none;
+}
+
+/* TV Mode Focus States */
+.figma-tv-mode .figma-nav-btn:focus {
+  outline: 3px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.figma-tv-mode .figma-nav-btn.active:focus {
+  animation: circularGlow 3.5s linear infinite;
+}
+
+@keyframes circularGlow {
+  0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4); }
+  25% { box-shadow: 20px 0 20px rgba(255, 215, 0, 0.6), 40px 0 40px rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 20px 20px rgba(255, 215, 0, 0.6), 0 40px 40px rgba(255, 215, 0, 0.4); }
+  75% { box-shadow: -20px 0 20px rgba(255, 215, 0, 0.6), -40px 0 40px rgba(255, 215, 0, 0.4); }
+  100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4); }
+}
+
+/* MAIN CONTENT */
+.figma-main-content {
+  margin-left: 120px;
+  padding: 139px 40px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* TV MODE - Full width main content */
+.figma-tv-mode .figma-main-content {
+  width: 1145px;
+}
+
+/* HEADER */
+.figma-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  margin-bottom: 0;
+}
+
+.history-page .figma-header {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: var(--header-height) !important;
+  align-items: flex-start;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Removed .history-page .page-header hardcoded height */
+
+.figma-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.figma-title {
+  font-size: 24px !important;
+  line-height: 36px;
+  color: #6898ff;
+  margin: 0;
+  font-weight: normal;
+}
+
+.figma-subtitle {
+  font-size: 16px;
+  line-height: 24px;
+  color: white;
+  margin: 0;
+}
+
+/* Removed .onboarding-page .figma-header-left centering */
+
+
+.figma-status-badge {
+  background: white;
+  height: 36px;
+  width: 157.719px;
+  border-radius: 100px;
+  box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+.figma-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 100px;
+  background: #22c55e;
+  opacity: 0.526;
+}
+
+.figma-badge-text {
+  font-size: 14px;
+  line-height: 20px;
+  color: #4a5565;
+}
+
+.figma-timestamp {
+  font-size: 14px;
+  line-height: 20px;
+  color: #99a1af;
+  text-align: center;
+}
+
+/* STATUS ROW - Full Width at Top */
+.figma-status-row {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* STATUS CARD (White with gradient) */
+.figma-status-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.5) 100%);
+  width: 100%;
+  height: 120px;
+  border-radius: 24px;
+  box-shadow: 0px 8px 32px 0px rgba(0, 0, 0, 0.06);
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* METRICS + PLANT CONTAINER */
+.figma-metrics-plant-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.figma-status-icon {
+  width: 56px;
+  height: 56px;
+  background: rgb(239, 246, 255);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: inset 0px 2px 4px 0px rgba(0, 0, 0, 0.06);
+}
+
+.figma-status-text {
+  font-size: 16px;
+  line-height: 24px;
+  color: #101828;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* METRICS COLUMN (Left) */
+.figma-metrics-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* PLANT AREA (Right, larger) */
+.figma-plant-area {
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.3) 0%, rgba(80, 80, 80, 0.2) 100%);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 452px;
+}
+
+.figma-plant-label {
+  font-size: 12px;
+  line-height: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.figma-plant-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.figma-metric-tile {
+  width: 140px;
+  height: 136px;
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* COLORED TILES - Design System Spec */
+.figma-metric-tile.blue-tile {
+  background: #2563eb; /* blue-600 */
+  box-shadow: 0px 4px 12px 0px rgba(37, 99, 235, 0.15);
+}
+
+.figma-metric-tile.orange-tile {
+  background: #f97316; /* orange-500 */
+  box-shadow: 0px 4px 12px 0px rgba(249, 115, 22, 0.15);
+}
+
+.figma-metric-tile.green-tile {
+  background: #22c55e; /* green-500 */
+  box-shadow: 0px 4px 12px 0px rgba(34, 197, 94, 0.15);
+}
+
+.figma-metric-icon-circle {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0px 1px 4px 0px rgba(0, 0, 0, 0.08);
+}
+
+.figma-metric-icon {
+  font-size: 20px;
+}
+
+.figma-metric-label {
+  font-size: 12px;
+  line-height: 16px;
+  color: white;
+  opacity: 0.75;
+  margin: 0;
+}
+
+.figma-metric-value {
+  font-size: 14px;
+  line-height: 20px;
+  color: white;
+  opacity: 0.95;
+  margin: 0;
+}
+
+/* BOTTOM CONTAINER */
+.figma-bottom-container {
+  display: grid;
+  grid-template-columns: 266px 1fr 266px;
+  gap: 40px;
+  margin-top: 50px;
+}
+
+/* ACTION TILES */
+.figma-action-tile {
+  height: 267px;
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.figma-action-tile:hover,
+.figma-action-tile:focus {
+  transform: translateY(-4px);
+  outline: none;
+}
+
+.figma-tv-mode .figma-action-tile:focus {
+  outline: 3px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* TV MODE - Better chart sizing for larger screens */
+.figma-tv-mode .figma-action-tiles {
+  grid-template-columns: 1fr 2fr 1fr;
+}
+
+.figma-tv-mode .figma-tv-chart {
+  min-width: 600px;
+}
+
+.figma-tv-mode .figma-chart-container {
+  height: 280px;
+}
+
+.figma-tv-mode .figma-metric-tile:focus,
+.figma-tv-mode .figma-status-card:focus,
+.figma-tv-mode .figma-header:focus,
+.figma-tv-mode .figma-plant-area:focus {
+  outline: 3px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* BRIGHT GRADIENT ACTION TILES */
+.figma-action-tile.purple-tile {
+  background: linear-gradient(135deg, rgb(168, 85, 247) 0%, rgb(147, 51, 234) 100%);
+  box-shadow: 0px 4px 24px 0px rgba(168, 85, 247, 0.5);
+}
+
+.figma-action-tile.cyan-tile {
+  background: linear-gradient(135deg, rgb(6, 182, 212) 0%, rgb(8, 145, 178) 100%);
+  box-shadow: 0px 4px 24px 0px rgba(6, 182, 212, 0.5);
+}
+
+.figma-action-icon-circle {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0px 2px 8px 0px rgba(0, 0, 0, 0.1);
+}
+
+.figma-action-icon {
+  font-size: 20px;
+}
+
+.figma-action-label {
+  font-size: 12px;
+  line-height: 16px;
+  color: white;
+  opacity: 0.75;
+  margin: 0;
+}
+
+.figma-action-text {
+  font-size: 14px;
+  line-height: 20px;
+  color: white;
+  margin: 0;
+}
+
+/* CHART TILE */
+.figma-chart-tile {
+  height: 382px;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.figma-chart-title {
+  font-size: 14px;
+  line-height: 20px;
+  color: rgb(255, 252, 252);
+  margin: 0 0 16px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.figma-chart-content {
+  position: relative;
+  height: 300px;
+  z-index: 2;
+}
+
+.figma-chart-bubbles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.figma-chart-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(124, 58, 237, 0.15), rgba(124, 58, 237, 0.05));
+  animation: floatBubble 15s infinite ease-in-out;
+}
+
+.figma-chart-bubble:nth-child(1) {
+  width: 80px;
+  height: 80px;
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 12s;
+}
+
+.figma-chart-bubble:nth-child(2) {
+  width: 60px;
+  height: 60px;
+  left: 30%;
+  animation-delay: 2s;
+  animation-duration: 14s;
+}
+
+.figma-chart-bubble:nth-child(3) {
+  width: 100px;
+  height: 100px;
+  left: 50%;
+  animation-delay: 4s;
+  animation-duration: 16s;
+}
+
+.figma-chart-bubble:nth-child(4) {
+  width: 70px;
+  height: 70px;
+  left: 70%;
+  animation-delay: 1s;
+  animation-duration: 13s;
+}
+
+.figma-chart-bubble:nth-child(5) {
+  width: 90px;
+  height: 90px;
+  left: 20%;
+  animation-delay: 3s;
+  animation-duration: 15s;
+}
+
+.figma-chart-bubble:nth-child(6) {
+  width: 50px;
+  height: 50px;
+  left: 85%;
+  animation-delay: 5s;
+  animation-duration: 11s;
+}
+
+@keyframes floatBubble {
+  0% {
+    transform: translateY(100%) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-100%) scale(1.2);
+    opacity: 0;
+  }
+}
+
+.figma-chart-placeholder {
+  height: 300px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   PAGE CONTENT & LOGO
+   ============================================ */
+
+.figma-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 0;
+}
+
+.figma-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+  padding: 20px 0;
+}
+
+.figma-logo {
+  max-width: 200px;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.figma-logo:hover {
+  opacity: 0.8;
+}
+
+/* ============================================
+   MOBILE LAYOUT
+   ============================================ */
+
+.figma-mobile-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.12), transparent 50%),
+    linear-gradient(127.935deg, rgb(68, 68, 68) 0%, rgb(0, 0, 0) 100%);
+  color: white;
+  font-family: Arial, sans-serif;
+  padding-bottom: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Base gradient layer (always visible) */
+.figma-mobile-layout::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgb(45, 45, 50) 0%, rgb(20, 20, 25) 50%, rgb(0, 0, 0) 100%);
+  z-index: -3;
+}
+
+/* Animated light layer */
+.figma-mobile-layout::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.12), transparent 50%);
+  z-index: -2;
+  animation: lightShift 60s ease-in-out infinite;
+}
+
+.figma-mobile-header {
+  padding: 1.5rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.figma-back-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.figma-back-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.figma-mobile-title-section {
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  margin-bottom: 1rem;
+}
+
+.figma-mobile-title {
+  font-size: 1.5rem;
+  color: #6898ff;
+  margin: 0 0 0.5rem 0;
+}
+
+.figma-mobile-subtitle {
+  font-size: 0.9rem;
+  color: white;
+  margin: 0;
+}
+
+.figma-mobile-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Onboarding mobile results */
+.onboarding-results-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.onboarding-results-mobile .onboarding-plant-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.onboarding-results-mobile .onboarding-plant-card:active {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.98);
+}
+
+.onboarding-results-mobile .onboarding-plant-card h3 {
+  color: white;
+  font-size: 1rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.onboarding-results-mobile .onboarding-plant-card .latin-name {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  margin: 0;
+  font-style: italic;
+}
+
+.figma-mobile-status-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.figma-mobile-status-icon {
+  width: 48px;
+  height: 48px;
+  background: rgb(239, 246, 255);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.figma-mobile-status-text {
+  font-size: 1rem;
+  color: #101828;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+
+.figma-mobile-timestamp {
+  font-size: 0.85rem;
+  color: #ffffff;
+  margin: 0;
+}
+
+.figma-mobile-plant-area {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.figma-mobile-plant-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 0.75rem 0;
+}
+
+.figma-mobile-plant-container {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.figma-mobile-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.figma-mobile-metric-tile {
+  padding: 1.25rem 0.75rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  min-height: 120px;
+  justify-content: center;
+}
+
+.figma-mobile-metric-tile.blue-shadow {
+  box-shadow: 0px 2px 12px 0px rgba(59, 130, 246, 0.2);
+}
+
+.figma-mobile-metric-tile.orange-shadow {
+  box-shadow: 0px 2px 12px 0px rgba(251, 146, 60, 0.2);
+}
+
+.figma-mobile-metric-tile.green-shadow {
+  box-shadow: 0px 2px 12px 0px rgba(34, 197, 94, 0.2);
+}
+
+.figma-mobile-metric-icon {
+  font-size: 32px;
+}
+
+.figma-mobile-metric-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  text-align: center;
+}
+
+.figma-mobile-metric-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+  color: white;
+}
+
+/* MOBILE METRIC TILE COLORS */
+.figma-mobile-metric-tile.blue-tile {
+  background: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%);
+  box-shadow: 0px 4px 16px 0px rgba(59, 130, 246, 0.4);
+}
+
+.figma-mobile-metric-tile.orange-tile {
+  background: linear-gradient(135deg, rgb(251, 146, 60) 0%, rgb(249, 115, 22) 100%);
+  box-shadow: 0px 4px 16px 0px rgba(251, 146, 60, 0.4);
+}
+
+.figma-mobile-metric-tile.green-tile {
+  background: linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(22, 163, 74) 100%);
+  box-shadow: 0px 4px 16px 0px rgba(34, 197, 94, 0.4);
+}
+
+.figma-mobile-chart-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-height: 250px;
+}
+
+.figma-mobile-chart-container {
+  height: 200px;
+  width: 100%;
+}
+
+.figma-mobile-chart-title {
+  font-size: 0.9rem;
+  color: white;
+  margin: 0 0 1rem 0;
+}
+
+.figma-mobile-chart-placeholder {
+  height: 200px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.figma-mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.figma-mobile-action-btn {
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.figma-mobile-action-btn:active {
+  transform: scale(0.98);
+}
+
+.figma-mobile-action-btn.purple-shadow {
+  box-shadow: 0px 2px 12px 0px rgba(168, 85, 247, 0.2);
+}
+
+.figma-mobile-action-btn.cyan-shadow {
+  box-shadow: 0px 2px 12px 0px rgba(6, 182, 212, 0.2);
+}
+
+.figma-mobile-action-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.figma-mobile-action-text {
+  flex: 1;
+}
+
+.figma-mobile-action-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 0.25rem 0;
+}
+
+.figma-mobile-action-desc {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* MOBILE ACTION BUTTON COLORS */
+.figma-mobile-action-btn.purple-tile {
+  background: linear-gradient(135deg, rgb(168, 85, 247) 0%, rgb(147, 51, 234) 100%);
+  box-shadow: 0px 4px 16px 0px rgba(168, 85, 247, 0.4);
+}
+
+.figma-mobile-action-btn.cyan-tile {
+  background: linear-gradient(135deg, rgb(6, 182, 212) 0%, rgb(8, 145, 178) 100%);
+  box-shadow: 0px 4px 16px 0px rgba(6, 182, 212, 0.4);
+}
+
+/* MOBILE LOGO IN HEADER */
+.figma-mobile-header .figma-logo-container {
+  margin-top: 0;
+  padding: 0;
+}
+
+.figma-mobile-header .figma-logo {
+  max-width: 120px;
+  opacity: 0.8;
+}
+
+.figma-mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.figma-mobile-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.5rem 1rem;
+  transition: color 0.2s ease;
+}
+
+.figma-mobile-nav-btn.active {
+  color: white;
+}
+
+.figma-mobile-nav-icon {
+  font-size: 24px;
+}
+
+.figma-mobile-nav-label {
+  font-size: 0.7rem;
+}
+
+/* ============================================
+   MOBILE SLIDE-OUT MENU
+   ============================================ */
+
+/* MENU TAB - White glowing button on left edge */
+.figma-mobile-menu-tab {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: none;
+  border-radius: 0 12px 12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 
+    0 0 20px rgba(255, 255, 255, 0.3),
+    0 0 40px rgba(255, 255, 255, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  animation: softPulse 2s ease-in-out infinite;
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(255, 255, 255, 0.3),
+      0 0 40px rgba(255, 255, 255, 0.2),
+      0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(255, 255, 255, 0.5),
+      0 0 60px rgba(255, 255, 255, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.figma-mobile-menu-tab:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.figma-menu-tab-icon {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* OVERLAY - Dark backdrop */
+.figma-mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1001;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* SIDE MENU - Slides in from left with FROSTED GLASS */
+.figma-mobile-menu {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
+  background: rgba(30, 30, 35, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 1002;
+  transition: left 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+.figma-mobile-menu.open {
+  left: 0;
+}
+
+.figma-mobile-menu-header {
+  padding: 2rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.figma-mobile-menu-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.figma-mobile-menu-nav {
+  flex: 1;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.figma-mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.figma-mobile-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.figma-mobile-menu-item.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: white;
+  border-left-color: #3b82f6;
+}
+
+.figma-mobile-menu-icon {
+  font-size: 24px;
+  width: 32px;
+  text-align: center;
+}
+
+.figma-mobile-menu-label {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Hide menu tab on desktop */
+@media (min-width: 769px) {
+  .figma-mobile-menu-tab,
+  .figma-mobile-menu,
+  .figma-mobile-menu-overlay {
+    display: none;
+  }
+}
+
+/* Responsive hide/show */
+@media (max-width: 768px) {
+  .figma-desktop-layout {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .figma-mobile-layout {
+    display: none;
+  }
+}
+
+/* OLD METRO STYLES - TO BE DELETED */
+.metro-container {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1d2e 0%, #2d1b3d 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Rotated Sidebar Navigation */
+.metro-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+  gap: 2rem;
+  z-index: 100;
+}
+
+.metro-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.metro-nav-item img {
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) invert(1) opacity(0.7);
+  transition: filter 0.3s ease;
+}
+
+.metro-nav-item span {
+  font-size: 0.75rem;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}
+
+.metro-nav-item:hover,
+.metro-nav-item:focus {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.metro-nav-item:hover img,
+.metro-nav-item:focus img {
+  filter: brightness(0) invert(1) opacity(1);
+}
+
+.metro-nav-item.active {
+  color: white;
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.metro-nav-item.active img {
+  filter: brightness(0) invert(1) opacity(1);
+}
+
+/* Animated Circular Glow for Active Menu Item */
+.metro-tv .metro-nav-item.active:focus {
+  outline: 3px solid #ffd700;
+  animation: circularGlow 3.5s linear infinite;
+}
+
+@keyframes circularGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 40px rgba(255, 215, 0, 0.4);
+  }
+  25% {
+    box-shadow: 20px 0 20px rgba(255, 215, 0, 0.6),
+                40px 0 40px rgba(255, 215, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 20px 20px rgba(255, 215, 0, 0.6),
+                0 40px 40px rgba(255, 215, 0, 0.4);
+  }
+  75% {
+    box-shadow: -20px 0 20px rgba(255, 215, 0, 0.6),
+                -40px 0 40px rgba(255, 215, 0, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 40px rgba(255, 215, 0, 0.4);
+  }
+}
+
+/* Main Content Area */
+.metro-content {
+  margin-left: 80px;
+  flex: 1;
+  padding: 2rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Header */
+.metro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metro-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+}
+
+.metro-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Top Section: Status Card + Metrics */
+.metro-top-section {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+}
+
+.metro-status-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  border-left: 4px solid;
+  backdrop-filter: blur(10px);
+}
+
+.status-emoji {
+  font-size: 4rem;
+}
+
+.status-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.status-timestamp {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.metro-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.metro-tile {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease;
+}
+
+.metro-tile:hover {
+  transform: translateY(-2px);
+}
+
+.metro-tile.moisture-tile {
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+.metro-tile.temperature-tile {
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+}
+
+.metro-tile.light-tile {
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+}
+
+.tile-icon {
+  width: 40px;
+  height: 40px;
+  filter: brightness(0) invert(1);
+}
+
+.tile-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+}
+
+.tile-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Middle Section: Plant Viz + Chart */
+.metro-middle-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  min-height: 450px;
+}
+
+.metro-plant-area {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.metro-chart-area {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.metro-chart-area canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1rem;
+}
+
+/* Bottom Section: Action Tiles */
+.metro-bottom-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.metro-action-tile {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.metro-action-tile:hover,
+.metro-action-tile:focus {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.metro-tv .metro-action-tile:focus {
+  outline: 3px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.metro-action-tile.details-tile {
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+}
+
+.metro-action-tile.history-tile {
+  box-shadow: 0 4px 20px rgba(96, 165, 250, 0.3);
+}
+
+.metro-action-tile.edit-tile {
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+}
+
+.action-icon {
+  width: 48px;
+  height: 48px;
+  filter: brightness(0) invert(1);
+}
+
+.metro-action-tile span {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Purple Chart Styling from Backup */
+.metro-chart-area canvas {
+  filter: hue-rotate(270deg) saturate(1.2);
+}
+
+/* ============================================
+   MOBILE UI STYLES
+   ============================================ */
+
+.mobile-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1d2e 0%, #2d1b3d 100%);
+  color: white;
+  padding-bottom: 80px;
+}
+
+.mobile-header {
+  padding: 1.5rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.mobile-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mobile-status-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  border-left: 4px solid;
+  backdrop-filter: blur(10px);
+}
+
+.mobile-plant-area {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  backdrop-filter: blur(10px);
+}
+
+.mobile-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.mobile-metric-tile {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.mobile-metric-tile.moisture-tile {
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.mobile-metric-tile.temperature-tile {
+  box-shadow: 0 2px 10px rgba(249, 115, 22, 0.3);
+}
+
+.mobile-metric-tile.light-tile {
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+.metric-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) invert(1);
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.metric-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+}
+
+.mobile-chart-area {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.chart-wrapper {
+  height: 200px;
+}
+
+.mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mobile-action-button {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: white;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.mobile-action-button:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.mobile-action-button img {
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) invert(1);
+}
+
+.mobile-action-button span {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.5rem 1rem;
+  transition: color 0.2s ease;
+}
+
+.mobile-nav-item img {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1) opacity(0.6);
+  transition: filter 0.2s ease;
+}
+
+.mobile-nav-item span {
+  font-size: 0.7rem;
+}
+
+.mobile-nav-item.active {
+  color: white;
+}
+
+.mobile-nav-item.active img {
+  filter: brightness(0) invert(1) opacity(1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .metro-container {
+    display: none; /* Hide metro on mobile */
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-container {
+    display: none; /* Hide mobile on desktop/TV */
+  }
+}
+
+@media (min-width: 1920px) {
+  .metro-content {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  
+  .metro-title {
+    font-size: 2.5rem;
+  }
+  
+  .tile-value {
+    font-size: 2.5rem;
+  }
+}
+
+/* ========================================
+   DETAILS PAGE - CARD LAYOUT
+   ======================================== */
+
+.details-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  max-width: 1200px;
+  margin-top: var(--space-xl);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.details-mobile-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.details-card {
+  background: #1f2129;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.2s ease;
+}
+
+.details-card:hover {
+  border-color: #4b5563;
+}
+
+.details-card.status-card {
+  background: #1a2e26;
+  border-color: #2d5a45;
+}
+
+.details-card-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #374151;
+}
+
+.details-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.details-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.details-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.details-label {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.details-value {
+  font-size: 13px;
+  color: white;
+  font-weight: 500;
+}
+
+.details-divider {
+  height: 1px;
+  background: #374151;
+}
+
+/* Desktop-specific enhancements */
+@media (min-width: 1024px) {
+  .details-card-grid .details-card {
+    background: rgba(31, 33, 41, 0.8);
+    border: 1px solid rgba(55, 65, 81, 0.6);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    backdrop-filter: blur(var(--blur-sm));
+  }
+  
+  .details-card-grid .details-card:hover {
+    border-color: rgba(75, 85, 99, 0.8);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .details-card-grid .details-card.status-card {
+    background: rgba(26, 46, 38, 0.9);
+    border-color: rgba(45, 90, 69, 0.8);
+  }
+  
+  .details-card-grid .details-card.status-card:hover {
+    border-color: rgba(45, 90, 69, 1);
+    box-shadow: 0 0.5rem 1rem rgba(34, 197, 94, 0.15);
+  }
+  
+  .details-card-grid .details-card-header {
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid #374151;
+  }
+  
+  .details-card-grid .details-card-title {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: white;
+    letter-spacing: 0.025em;
+  }
+  
+  .details-card-grid .details-card-content {
+    gap: var(--space-md);
+  }
+  
+  .details-card-grid .details-row {
+    padding: var(--space-sm) 0;
+  }
+  
+  .details-card-grid .details-label {
+    font-size: var(--text-sm);
+    color: #9ca3af;
+  }
+  
+  .details-card-grid .details-value {
+    font-size: var(--text-base);
+    color: white;
+    font-weight: var(--weight-medium);
+  }
+  
+  .details-card-grid .details-divider {
+    background: #374151;
+    margin: var(--space-xs) 0;
+  }
+}
+
+/* ========================================
+   HISTORY PAGE - CHART CARD
+   ======================================== */
+
+.history-chart-card {
+  background: #1f2129;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0;
+}
+
+.history-range-selector {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #374151;
+}
+
+.history-range-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.history-range-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #8b5cf6;
+}
+
+.history-range-label {
+  font-size: 13px;
+  color: white;
+  font-weight: 500;
+}
+
+.history-chart-wrapper {
+  height: 300px;
+  position: relative;
+}
+
+/* ========================================
+   RESPONSIVE - DETAILS & HISTORY
+   ======================================== */
+
+@media (max-width: 1023px) {
+  .details-card-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+}
+
+@media (min-width: 1920px) {
+  .details-card-grid {
+    max-width: 1400px;
+    gap: var(--space-2xl);
+  }
+  
+  .details-card {
+    padding: var(--space-2xl);
+  }
+  
+  .details-card-title {
+    font-size: var(--text-base);
+  }
+  
+  .details-label {
+    font-size: var(--text-base);
+  }
+  
+  .details-value {
+    font-size: var(--text-lg);
+  }
+  
+  .history-chart-card {
+    width: 1200px;
+  }
+  
+  .history-chart-wrapper {
+    height: 500px;
+  }
+}

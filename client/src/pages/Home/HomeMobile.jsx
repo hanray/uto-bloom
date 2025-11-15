@@ -1,0 +1,173 @@
+import { Link } from 'react-router-dom';
+import { Line } from 'react-chartjs-2';
+import PlantVisualization from '../../components/PlantVisualization';
+import MobileMenu from '../../components/MobileMenu';
+import logo from '../../icons/uto-labs-logo4x.png';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import StatusIndicator from '../../components/StatusIndicator';
+
+/**
+ * MOBILE LAYOUT - Single column stacked design with slide-out menu
+ * Adapted from Figma design for mobile viewport
+ */
+function HomeMobile({ plant, status, lastReading, chartData, loading, statusConfig }) {
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: { left: 0, right: 0, top: 10, bottom: 0 } },
+    plugins: { 
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        padding: 12,
+        displayColors: false
+      }
+    },
+    scales: {
+      x: { 
+        display: true,
+        ticks: { color: '#fff', maxRotation: 0, autoSkip: true, maxTicksLimit: 6 },
+        grid: { color: 'rgba(255,255,255,0.05)' }
+      },
+      y: { 
+        display: true,
+        beginAtZero: true,
+        max: 1023,
+        ticks: { 
+          color: '#fff',
+          stepSize: 200
+        },
+        grid: { color: 'rgba(255,255,255,0.05)' }
+      }
+    },
+    elements: {
+      point: { 
+        radius: 0,
+        hoverRadius: 4,
+        backgroundColor: '#7c3aed',
+        borderColor: '#7c3aed'
+      },
+      line: { 
+        borderWidth: 2,
+        tension: 0.4,
+        borderColor: '#7c3aed',
+        fill: true,
+        backgroundColor: 'rgba(124, 58, 237, 0.1)'
+      }
+    }
+  };
+
+  return (
+    <div className="figma-mobile-layout">
+      {/* SLIDE-OUT MENU */}
+      <MobileMenu currentPage="/" />
+
+      {/* HEADER */}
+      <div className="figma-mobile-header">
+        <div className="figma-logo-container">
+          <img src={logo} alt="Uto Labs" className="figma-logo" />
+        </div>
+      </div>
+
+      {/* TITLE */}
+      <div className="figma-mobile-title-section">
+        <h1 className="figma-title">Uto Bloom</h1>
+        <p className="figma-subtitle">
+          {plant?.common_name || 'Monstera'} • {plant?.location || 'Living Room'}
+        </p>
+      </div>
+
+      {/* SCROLLABLE CONTENT */}
+      <div className="figma-mobile-content">
+        {/* Status Card */}
+        <StatusIndicator 
+          status={status} 
+          statusConfig={statusConfig}
+          className="status-indicator--mobile"
+        />
+        <p className="figma-mobile-timestamp">
+          Last updated {lastReading?.last_seen 
+              ? new Date(lastReading.last_seen).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                })
+              : '09:24 PM'}
+        </p>
+
+        {/* Metrics Grid */}
+        <div className="figma-mobile-plant-area">
+          <div className="figma-mobile-plant-container">
+            <PlantVisualization 
+              species={plant?.species_key || 'monstera'} 
+              health={(lastReading?.moisture_level || 50) / 100}
+              height={280}
+            />
+          </div>
+        </div>
+
+        {/* Metrics Grid */}
+        <div className="figma-mobile-metrics">
+          <div className="figma-mobile-metric-tile blue-tile">
+            <div className="figma-mobile-metric-icon">💧</div>
+            <p className="figma-mobile-metric-label">Moisture</p>
+            <p className="figma-mobile-metric-value">
+              {lastReading?.moisture_level?.toFixed(0) || '32'}%
+            </p>
+          </div>
+
+          <div className="figma-mobile-metric-tile orange-tile">
+            <div className="figma-mobile-metric-icon">🌡️</div>
+            <p className="figma-mobile-metric-label">Temperature</p>
+            <p className="figma-mobile-metric-value">
+              {lastReading?.temperature?.toFixed(1) || '22.5'}°C
+            </p>
+          </div>
+
+          <div className="figma-mobile-metric-tile green-tile">
+            <div className="figma-mobile-metric-icon">🔋</div>
+            <p className="figma-mobile-metric-label">Battery</p>
+            <p className="figma-mobile-metric-value">
+              {lastReading?.battery_level?.toFixed(0) || '87'}%
+            </p>
+          </div>
+        </div>
+
+        {/* Chart Area */}
+        <div className="figma-mobile-chart-card">
+          <p className="figma-mobile-chart-title">Last 8 Hours<br/>Moisture Trend</p>
+          {chartData ? (
+            <div className="figma-mobile-chart-container">
+              <Line data={chartData} options={chartOptions} />
+            </div>
+          ) : (
+            <div className="figma-mobile-chart-placeholder">
+              <LoadingSpinner size="sm" text="Loading chart..." />
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="figma-mobile-actions">
+          <Link to="/details" className="figma-mobile-action-btn purple-tile">
+            <div className="figma-mobile-action-icon">✨</div>
+            <div className="figma-mobile-action-text">
+              <p className="figma-mobile-action-label">Health</p>
+              <p className="figma-mobile-action-desc">View Details</p>
+            </div>
+          </Link>
+
+          <Link to="/history" className="figma-mobile-action-btn cyan-tile">
+            <div className="figma-mobile-action-icon">📈</div>
+            <div className="figma-mobile-action-text">
+              <p className="figma-mobile-action-label">History</p>
+              <p className="figma-mobile-action-desc">View Trends</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default HomeMobile;

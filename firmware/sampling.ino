@@ -4,8 +4,8 @@
 // Uto Bloom Firmware - Sampling Module
 // Handles scheduled sensor readings
 
-// Default sampling interval: 15 minutes (900000 ms)
-const unsigned long SAMPLING_INTERVAL = 15 * 60 * 1000;
+// Default sampling interval: 30 seconds (30000 ms)
+const unsigned long SAMPLING_INTERVAL = 30 * 1000;
 unsigned long lastSampleTime = 0;
 
 /**

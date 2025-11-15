@@ -1,4 +1,4 @@
-// REQ: Main App component with routing
+               3// REQ: Main App component with routing
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/Home'

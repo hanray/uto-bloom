@@ -70,11 +70,11 @@ class ErrorBoundary extends Component {
  * @param {number} moisture - Raw moisture sensor reading (0-1023)
  * @param {string} species - Plant species ID (e.g., "pothos", "monstera")
  */
-function PlantVisualization({ moisture = 343, species = 'pothos' }) {
+function PlantVisualization({ moisture = 343, species = 'pothos', height }) {
   return (
     <ErrorBoundary>
       <Suspense fallback={<PlantPlaceholder />}>
-        <PlantCanvas moisture={moisture} species={species} />
+        <PlantCanvas moisture={moisture} species={species} height={height} />
       </Suspense>
     </ErrorBoundary>
   );

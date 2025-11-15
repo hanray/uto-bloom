@@ -2,8 +2,13 @@
 // REQ: FR-UI-004 (Onboarding with local, offline catalog search)
 
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { HomeIcon, HistoryIcon, DetailsIcon, SettingsIcon } from '../components/NavIcon';
 import logo from '../icons/uto-labs-logo4x.png';
+import LoadingSpinner from '../components/LoadingSpinner';
+import SearchBar from '../components/SearchBar';
+import MobileMenu from '../components/MobileMenu';
+import { useDeviceDetection } from '../hooks/useDeviceDetection';
 
 function Onboarding() {
   const navigate = useNavigate();
@@ -13,6 +18,7 @@ function Onboarding() {
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isTVMode, setIsTVMode] = useState(false);
+  const { isMobile } = useDeviceDetection();
   const resultRefs = useRef([]);
   const searchInputRef = useRef(null);
 
@@ -121,61 +127,135 @@ function Onboarding() {
   }, [selectedIndex, isTVMode]);
 
   const handleSelectPlant = (plant) => {
-    // Force blur all inputs and remove focus to dismiss keyboard
+    // Clear search and results immediately
+    setSearchTerm('');
+    setResults([]);
+    
+    // Force blur all inputs to dismiss keyboard
     if (document.activeElement) {
       document.activeElement.blur();
     }
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => input.blur());
     
+    // Save and navigate
+    localStorage.setItem('selectedPlant', JSON.stringify(plant));
+    
     // Small delay to ensure keyboard dismissal before navigation
     setTimeout(() => {
-      localStorage.setItem('selectedPlant', JSON.stringify(plant));
       navigate(`/${isTVMode ? '?tv=1' : ''}`);
     }, 100);
   };
 
   if (loading) {
-    return <div className="loading">Loading plant catalog...</div>;
+    return <LoadingSpinner fullScreen text="Loading plant catalog..." />;
   }
 
-  return (
-    <div className={`onboarding-page ${isTVMode ? 'tv-mode' : ''}`}>
-      <h1>What is your plant?</h1>
-      
-      {!isTVMode && (
-        <div className="search-container">
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Value"
+  // MOBILE LAYOUT
+  if (isMobile && !isTVMode) {
+    return (
+      <div className="figma-mobile-layout">
+        {/* SLIDE-OUT MENU */}
+        <MobileMenu currentPage="/onboarding" />
+
+        {/* HEADER */}
+        <div className="figma-mobile-header">
+          <div className="figma-logo-container">
+            <img src={logo} alt="Uto Labs" className="figma-logo" />
+          </div>
+        </div>
+
+        {/* TITLE */}
+        <div className="figma-mobile-title-section">
+          <h1 className="figma-title">Choose Your Plant</h1>
+          <p className="figma-subtitle">Search for your plant species</p>
+        </div>
+
+        {/* SCROLLABLE CONTENT */}
+        <div className="figma-mobile-content">
+          {/* Search Bar */}
+          <SearchBar
+            placeholder="Search plants by name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            autoFocus
+            variant="primary"
           />
-        </div>
-      )}
-      
-      <div className="logo-container">
-        <img src={logo} alt="UTO Labs" className="logo" />
-      </div>
-      
-      <div className="app-name">UtoBloom</div>
-      
-      <div className="results-list">
-        {results.map((plant, index) => (
-          <div 
-            key={plant.id}
-            ref={el => resultRefs.current[index] = el}
-            className={`plant-card-item ${isTVMode && index === selectedIndex ? 'tv-selected' : ''}`}
-            onClick={() => !isTVMode && handleSelectPlant(plant)}
-            tabIndex={isTVMode ? -1 : 0}
-          >
-            <h3>{plant.common_name}</h3>
-            <p className="latin-name">{plant.latin_name}</p>
+          
+          {/* Results */}
+          <div className="onboarding-results-mobile">
+            {results.map((plant, index) => (
+              <div 
+                key={plant.id}
+                ref={el => resultRefs.current[index] = el}
+                className="onboarding-plant-card"
+                onClick={() => handleSelectPlant(plant)}
+                tabIndex={0}
+              >
+                <h3>{plant.common_name}</h3>
+                <p className="latin-name">{plant.latin_name}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
+    );
+  }
+
+  // DESKTOP/TV LAYOUT
+  return (
+    <div className={`app-layout onboarding-page ${isTVMode ? 'tv-mode' : ''}`}>
+      {/* LEFT SIDEBAR - Vertical Pill Navigation */}
+      <nav className="app-nav figma-sidebar-nav">
+        <Link to="/" className="figma-nav-btn">🏠</Link>
+        <Link to="/history" className="figma-nav-btn">📊</Link>
+        <Link to="/details" className="figma-nav-btn">ℹ️</Link>
+        <Link to="/onboarding" className="figma-nav-btn active">🌱</Link>
+      </nav>
+
+      {/* MAIN CONTENT GRID */}
+      <main className="app-content">
+        {/* HEADER - Row 1 - Reusable Header Component */}
+        <header className="page-header figma-header">
+          <div className="figma-header-left">
+            <h1 className="figma-title">Choose Your Plant</h1>
+            <p className="figma-subtitle">Search for your plant species</p>
+          </div>
+        </header>
+        
+        {/* MAIN SECTION - Row 2 - All content below header */}
+        <div className="content-full page-main">
+          {/* Search Bar */}
+          {!isTVMode && (
+            <div className="content-full">
+              <SearchBar
+                placeholder="Search plants by name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                variant="primary"
+              />
+            </div>
+          )}
+          
+          {/* Results */}
+          {results.map((plant, index) => (
+            <div 
+              key={plant.id}
+              ref={el => resultRefs.current[index] = el}
+              className={`content-full onboarding-plant-card ${isTVMode && index === selectedIndex ? 'tv-selected' : ''}`}
+              onClick={() => !isTVMode && handleSelectPlant(plant)}
+              tabIndex={isTVMode ? -1 : 0}
+            >
+              <h3>{plant.common_name}</h3>
+              <p className="latin-name">{plant.latin_name}</p>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* FOOTER - Logo */}
+      <footer className="app-footer">
+        <img src={logo} alt="Uto Labs" className="figma-logo" />
+      </footer>
     </div>
   );
 }

@@ -25,17 +25,17 @@ const THRESHOLDS = {
   DRY: 250,        // Below this = dry
   FINE_MIN: 250,   // Fine range start
   GREAT_MIN: 450,  // Great range start
-  GREAT_MAX: 800,  // Great range end
+  GREAT_MAX: 850,  // Great range end (changed from 800)
   SOAKED: 850      // Above this = over-wet
 };
 
 /**
  * Compute status from current reading
  * Per BRD (updated rules):
- * - Need water: raw < 250 for 2 consecutive reads
+ * - Need water: raw < 250
  * - I'm doing fine: 250 ≤ raw < 450
- * - I'm doing great: 450 ≤ raw < 800
- * - Over-wet: raw ≥ 850 sustained ≥ 12h (contributes to care)
+ * - I'm doing great: 450 ≤ raw < 850
+ * - Over-wet: raw ≥ 850 (contributes to care)
  * 
  * Note: For MVP single-document model, we simplify to instant status
  */
@@ -50,15 +50,12 @@ function computeStatus(soilRaw, tempC = null) {
   } else if (soilRaw >= 250 && soilRaw < 450) {
     status = STATUS.FINE;
     reason = 'Soil moisture is okay';
-  } else if (soilRaw >= 450 && soilRaw < 800) {
+  } else if (soilRaw >= 450 && soilRaw < 850) {
     status = STATUS.GREAT;
     reason = 'Soil moisture is perfect!';
   } else if (soilRaw >= 850) {
     status = STATUS.OVER_WET;
     reason = 'Soil is very wet - let it dry out';
-  } else if (soilRaw >= 800) {
-    status = STATUS.FINE;
-    reason = 'Soil moisture is adequate';
   }
   
   // Temperature checks (if available)

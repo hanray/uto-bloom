@@ -1,0 +1,332 @@
+/**
+ * ============================================
+ * UTOBLOOM UNIFIED LAYOUT SYSTEM
+ * ============================================
+ * Industry-standard grid-based layout system
+ * Replaces fragmented layout approach with
+ * centralized, predictable structure
+ * ============================================
+ */
+
+/* ============================================
+   Z-INDEX SCALE
+   ============================================ */
+:root {
+  --z-base: 0;
+  --z-content: 1;
+  --z-elevated: 10;
+  --z-nav: 100;
+  --z-dropdown: 200;
+  --z-modal: 1000;
+  --z-toast: 2000;
+  --z-focus: 9999;
+}
+
+/* ============================================
+   VERTICAL RHYTHM & SPACING
+   ============================================ */
+:root {
+  --baseline: 24px; /* All spacing multiples of 24 */
+  --section-spacing-sm: calc(var(--baseline) * 0.667); /* 16px */
+  --section-spacing-md: calc(var(--baseline) * 1.333); /* 32px */
+  --section-spacing-lg: calc(var(--baseline) * 2); /* 48px */
+  --section-spacing-xl: calc(var(--baseline) * 3); /* 72px */
+  --header-height: 68px; /* Standard page header height */
+}
+
+/* ============================================
+   GRID 1: LAYOUT GRID (Shell Structure)
+   Nav + Content Areas
+   ============================================ */
+.app-layout {
+  display: grid;
+  grid-template-columns: 85px 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas: 
+    "nav content"
+    "nav footer";
+  min-height: 100vh;
+  width: 100%;
+}
+
+.app-nav {
+  grid-area: nav;
+  position: fixed;
+  left: 13px;
+  top: 139px;
+  width: 72px;
+  z-index: var(--z-nav);
+}
+
+.app-footer {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--section-spacing-lg, 48px) 40px;
+  min-height: 120px;
+}
+
+/* ============================================
+   GRID 2: CONTENT GRID (12-Column System)
+   What goes inside .app-content
+   ============================================ */
+.app-content {
+  grid-area: content;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: auto;
+  gap: var(--space-lg, 24px);
+  padding: 139px 40px var(--section-spacing-lg, 48px) 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.history-page .app-content {
+  grid-template-rows: var(--header-height) 1fr !important;
+  align-items: start;
+}
+
+.details-page .app-content {
+  grid-template-rows: var(--header-height) 1fr !important;
+  align-items: start;
+}
+
+.onboarding-page .app-content {
+  grid-template-rows: var(--header-height) 1fr !important;
+  align-items: start;
+}
+
+/* ============================================
+   CONTENT GRID UTILITIES
+   ============================================ */
+
+/* Full width spanning */
+.content-full {
+  grid-column: 1 / -1;
+}
+
+/* Half width (6 columns) */
+.content-half {
+  grid-column: span 6;
+}
+
+/* Third width (4 columns) */
+.content-third {
+  grid-column: span 4;
+}
+
+/* Quarter width (3 columns) */
+.content-quarter {
+  grid-column: span 3;
+}
+
+/* Two-thirds width (8 columns) */
+.content-two-thirds {
+  grid-column: span 8;
+}
+
+/* ============================================
+   PAGE STRUCTURE ELEMENTS
+   ============================================ */
+
+/* Page header - always row 1, full width */
+.page-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin-bottom: var(--section-spacing-sm);
+}
+
+.history-page .page-header {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Main content area - row 2+ */
+.page-main {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: inherit;
+}
+
+/* Section spacing utilities */
+.section-spacing-sm { margin-bottom: var(--section-spacing-sm); }
+.section-spacing-md { margin-bottom: var(--section-spacing-md); }
+.section-spacing-lg { margin-bottom: var(--section-spacing-lg); }
+.section-spacing-xl { margin-bottom: var(--section-spacing-xl); }
+
+/* ============================================
+   LOADING & EMPTY STATES
+   ============================================ */
+.page-loading,
+.page-empty {
+  grid-column: 1 / -1;
+  min-height: 400px;
+  display: grid;
+  place-items: center;
+}
+
+/* ============================================
+   SCROLL BEHAVIOR
+   ============================================ */
+.app-content {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scroll-padding-top: 139px;
+}
+
+/* Hide scrollbar but keep functionality */
+.app-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.app-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.app-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   TV MODE ENHANCEMENTS
+   ============================================ */
+.app-layout.tv-mode {
+  grid-template-columns: 120px 1fr;
+}
+
+.tv-mode .app-nav {
+  left: 20px;
+  top: 180px;
+  width: 88px;
+}
+
+.tv-mode .app-content {
+  padding: 180px 80px 160px 80px;
+  gap: var(--space-2xl, 40px);
+  max-width: 1920px;
+  /* TV safe areas for overscan */
+  padding-left: max(80px, env(safe-area-inset-left));
+  padding-right: max(80px, env(safe-area-inset-right));
+  padding-top: max(180px, env(safe-area-inset-top));
+  padding-bottom: max(160px, env(safe-area-inset-bottom));
+}
+
+.tv-mode .app-footer {
+  bottom: 60px;
+}
+
+/* TV Mode: Disable ALL animations for performance */
+.tv-mode *,
+.tv-mode *::before,
+.tv-mode *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* TV Mode: Enhanced focus states */
+.tv-mode *:focus,
+.tv-mode *:focus-within {
+  outline: 3px solid #ffd700;
+  outline-offset: 4px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  z-index: var(--z-focus);
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   Desktop pages use app-layout, mobile uses figma-mobile-layout
+   ============================================ */
+@media (max-width: 844px) {
+  /* Hide desktop layout on mobile */
+  .app-layout {
+    display: none;
+  }
+}
+
+/* ============================================
+   ASPECT RATIO UTILITIES
+   ============================================ */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-portrait {
+  aspect-ratio: 3 / 4;
+}
+
+/* ============================================
+   TRANSITIONS (with reduced motion support)
+   ============================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .page-exit {
+    animation: fadeOut 0.2s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   DEBUG MODE (Optional)
+   Add .debug-grid to body to visualize grid
+   ============================================ */
+.debug-grid .app-content {
+  background-image: 
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.1) 0,
+      rgba(255, 0, 0, 0.1) 1px,
+      transparent 1px,
+      transparent calc(100% / 12)
+    );
+}
+
+.debug-grid .app-content > * {
+  outline: 1px dashed rgba(0, 255, 0, 0.3);
+}

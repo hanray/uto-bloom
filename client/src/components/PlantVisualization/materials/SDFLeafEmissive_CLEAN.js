@@ -155,13 +155,30 @@ export function createSDFLeafEmissiveMaterial(options = {}) {
       uniform sampler2D uSparkleTexture;
       uniform float uMaxGlow;
       varying vec2 vUv;
-      
+      varying vec3 vViewPosition;
+      #ifndef FLAT_SHADED
+      #endif
       #ifdef HAS_CUT_MASKS
         varying float vFenMask;
         varying float vSplitMask;
       #endif
       ${shader.fragmentShader}
     `;
+
+    // Add vViewPosition to vertex shader
+    shader.vertexShader = shader.vertexShader.replace(
+      'void main() {',
+      `varying vec3 vViewPosition;
+      varying vec3 vNormal;
+      void main() {`
+    );
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <project_vertex>',
+      `#include <project_vertex>
+      vViewPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+      vNormal = normal;
+      `
+    );
 
     shader.fragmentShader = shader.fragmentShader.replace(
       'vec4 diffuseColor = vec4( diffuse, opacity );',
@@ -183,32 +200,41 @@ export function createSDFLeafEmissiveMaterial(options = {}) {
       
       if (alpha < 0.01) discard;
       
-      // === MICRO-SPARKLES (blue-white-gold temporal twinkle) ===
+      // === MICRO-SPARKLES (REDUCED - barely visible) ===
       
       // Tiny rim (very subtle)
       vec3 N = normalize(vNormal);
       vec3 V = normalize(-vViewPosition);
       float rim = pow(1.0 - dot(N, V), 3.5);
-      vec3 rimCol = vec3(0.15, 0.8, 0.5) * 0.06 * rim;
+      vec3 rimCol = vec3(0.15, 0.8, 0.5) * 0.02 * rim; // REDUCED from 0.06 to 0.02
       
-      // Blue-white-gold micro-sparkles in UV space
-      float n = fract(sin(dot(vUv, vec2(127.1, 311.7))) * 43758.5453); // hash
-      float t = fract(n + uTime * 0.35);
-      float spark = smoothstep(0.98, 1.0, t); // rare bright pops
+      // Micro-sparkles (HEAVILY REDUCED)
+      float n = fract(sin(dot(vUv, vec2(127.1, 311.7))) * 43758.5453);
+      float t = fract(n + uTime * 0.08);
+      float spark = smoothstep(0.99, 1.0, t); // RARER: 0.99 instead of 0.98
       
-      // Color mix: cool blue to warm gold
+      // Color mix: cool blue to warm gold (MUCH DIMMER)
       vec3 sparkCol = mix(vec3(0.2, 0.6, 1.0), vec3(1.0, 0.9, 0.5), n);
-      sparkCol *= 0.25; // subtle per-fragment add
+      sparkCol *= 0.08; // REDUCED from 0.25 to 0.08
+      
+      // Cell-like drift (MINIMAL)
+      float cellDrift = sin(vUv.x * 6.0 + uTime * 0.12) * 0.04 + cos(vUv.y * 7.0 + uTime * 0.09) * 0.04;
+      sparkCol += cellDrift * 0.03; // REDUCED from 0.12 to 0.03
       
       // Combine
       vec3 emissive = rimCol + spark * sparkCol;
-      
+
+      // === Iridescent Edge Glow (SUBTLE) ===
+      float thin = smoothstep(0.75, 0.95, abs(vUv.x));
+      vec3 edgeGlow = vec3(0.3, 1.0, 0.6) * thin * 0.15; // REDUCED from 0.4 to 0.15
+      emissive += edgeGlow;
+
       // Clamp to prevent bloom blowout
       float totalGlow = length(emissive);
       if (totalGlow > uMaxGlow) {
         emissive = normalize(emissive) * uMaxGlow;
       }
-      
+
       // Additive blending output
       diffuseColor = vec4(emissive, alpha * 0.7);
       `

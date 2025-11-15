@@ -15,37 +15,23 @@ const { computeStatus } = require('../services/status-engine');
  */
 router.post('/ingest', async (req, res) => {
   try {
-    const { device_id, ts, soil, env } = req.body;
-    
-    console.log('📥 Ingest received:', { device_id, ts, soil_raw: soil?.raw, temp_c: env?.temp_c });
-    
+    const { device_id, soil, env } = req.body;
+    const serverTs = Math.floor(Date.now() / 1000);
+    console.log('📥 Ingest received:', { device_id, soil_raw: soil?.raw, temp_c: env?.temp_c });
+
     // Validation
-    if (!device_id || !ts || !soil || soil.raw === undefined) {
+    if (!device_id || !soil || soil.raw === undefined) {
       console.log('❌ Validation failed: Missing required fields');
       return res.status(400).json({ 
         success: false, 
-        error: 'Missing required fields: device_id, ts, soil.raw' 
+        error: 'Missing required fields: device_id, soil.raw' 
       });
     }
-    
-    // Timestamp validation (BR-SV-002)
-    // PROTOTYPE MODE: Relaxed validation for testing with fake timestamps
-    const now = Date.now() / 1000;
-    const oneWeekAgo = now - (7 * 24 * 3600); // Allow up to 1 week old
-    const oneWeekFromNow = now + (7 * 24 * 3600); // Allow up to 1 week future
-    
-    if (ts < oneWeekAgo || ts > oneWeekFromNow) {
-      console.log(`❌ Timestamp validation failed: ts=${ts}, now=${now}, diff=${now - ts}s`);
-      return res.status(400).json({
-        success: false,
-        error: 'Timestamp out of acceptable range'
-      });
-    }
-    
+
     // Compute status based on BRD rules
     const status = computeStatus(soil.raw, env?.temp_c);
     console.log(`💧 Status computed: ${status} (soil: ${soil.raw})`);
-    
+
     // Per BRD: Single document per node (overwrite)
     const nodes = req.db.collection('nodes');
     await nodes.updateOne(
@@ -58,7 +44,7 @@ router.post('/ingest', async (req, res) => {
           rh: env?.rh || null,
           lux: env?.lux || null,
           status: status,
-          last_seen: new Date(ts * 1000)
+          last_seen: new Date(serverTs * 1000)
         },
         $setOnInsert: {
           _id: device_id,
@@ -69,7 +55,22 @@ router.post('/ingest', async (req, res) => {
       },
       { upsert: true }
     );
-    
+
+    // Store reading in history collection for graphs
+    const readings = req.db.collection('readings');
+    await readings.insertOne({
+      device_id,
+      ts: serverTs,
+      soil_raw: soil.raw,
+      soil_norm: soil.norm || null,
+      temp_c: env?.temp_c || null,
+      rh: env?.rh || null,
+      lux: env?.lux || null,
+      status: status,
+      created_at: new Date(serverTs * 1000)
+    });
+    console.log(`📊 Historical reading stored (ts: ${serverTs})`);
+
     // Broadcast to WebSocket clients
     const wss = req.app.get('wss');
     if (wss) {
@@ -79,7 +80,7 @@ router.post('/ingest', async (req, res) => {
         if (client.readyState === 1) { // OPEN
           client.send(JSON.stringify({
             device_id,
-            ts,
+            ts: serverTs,
             soil_raw: soil.raw,
             temp_c: env?.temp_c,
             status
@@ -87,7 +88,7 @@ router.post('/ingest', async (req, res) => {
         }
       });
     }
-    
+
     console.log(`✅ Reading saved and broadcast\n`);
     res.status(200).json({ 
       success: true, 

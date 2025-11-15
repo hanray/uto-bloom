@@ -1,0 +1,88 @@
+/**
+ * StatusIndicator Styles - Design System Component
+ * Based on Figma Design System node 52-212
+ * Full-width colored bar with emoji and status text
+ */
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 64px;
+  width: 100%;
+  border-radius: 10px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.status-indicator__emoji {
+  font-size: 24px;
+  line-height: 32px;
+  flex-shrink: 0;
+}
+
+.status-indicator__text {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Compact variant for smaller spaces */
+.status-indicator--compact {
+  height: 48px;
+  gap: 8px;
+}
+
+.status-indicator--compact .status-indicator__emoji {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.status-indicator--compact .status-indicator__text {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Mobile variant */
+.status-indicator--mobile {
+  height: 56px;
+  border-radius: 12px;
+}
+
+/* Accessibility: Focus styles for interactive status indicators */
+.status-indicator:focus-visible {
+  outline: 2px solid var(--ring, rgba(0, 0, 0, 0.5));
+  outline-offset: 2px;
+}
+
+/* Animation for status changes */
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.status-indicator--animating {
+  animation: status-pulse 1s ease-in-out;
+}
+
+/* TV mode larger variant */
+.figma-tv-mode .status-indicator {
+  height: 80px;
+  gap: 16px;
+}
+
+.figma-tv-mode .status-indicator__emoji {
+  font-size: 32px;
+  line-height: 40px;
+}
+
+.figma-tv-mode .status-indicator__text {
+  font-size: 20px;
+  line-height: 28px;
+}
