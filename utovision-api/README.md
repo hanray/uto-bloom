@@ -4,6 +4,26 @@ Mock AI-powered plant vision analysis API for UtoBloom.
 
 ## Quick Start
 
+### Windows PowerShell (Recommended)
+
+**Start server:**
+```powershell
+.\start-server.ps1
+```
+
+**Stop server:**
+```powershell
+.\stop-server.ps1
+```
+
+**Quick test (starts server + runs test):**
+```powershell
+cd ..
+.\quick-test.ps1
+```
+
+### Manual Start
+
 ```bash
 # Install dependencies
 npm install
@@ -31,7 +51,8 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "image": "base64-encoded-image-data",
+  "frames": ["base64-encoded-image-data"],
+  "question": "Does my plant look healthy and well today?",
   "context": {
     "plant_id": "pot-01",
     "species": "monstera",
@@ -113,3 +134,17 @@ The mock API analyzes plant health based on sensor readings:
 ## Integration with UtoBloom
 
 The UtoBloom client calls this API when the AI Assistant tile is activated with camera access.
+
+## Troubleshooting
+
+See `../DEVELOPMENT_TIPS.md` for detailed troubleshooting and common issues.
+
+**Quick fixes:**
+- Port in use: `.\stop-server.ps1`
+- Server exits: Use `.\start-server.ps1` (opens persistent window)
+- Test fails: Run `cd .. ; .\quick-test.ps1`
+
+## Documentation
+
+- Full API Specification: `../UTOVISION_API_SPEC.md`
+- Development Guide: `../DEVELOPMENT_TIPS.md`
