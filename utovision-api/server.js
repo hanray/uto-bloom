@@ -96,141 +96,51 @@ app.post('/api/analyze/plant', validateApiKey, (req, res) => {
   });
   console.log(`   Plant: ${context?.species || 'unknown'} (${context?.plant_id})`);
 
-  // Simulate AI visual analysis
-  const analysis = generateVisualAnalysis(frames, question, context);
+  // TODO: Integrate with Ollama for real AI analysis
+  // This is a placeholder - implement real AI analysis here
+  console.log('⚠️  WARNING: Mock data removed. Real AI integration required!');
   
-  const processingTime = Date.now() - startTime;
-  console.log(`✅ Visual analysis complete in ${processingTime}ms`);
-  console.log(`   Health: ${analysis.health_assessment.overall_health}`);
-  console.log(`   Confidence: ${(analysis.health_assessment.confidence * 100).toFixed(0)}%`);
-
-  res.json(analysis);
+  res.status(501).json({
+    error: {
+      code: 'NOT_IMPLEMENTED',
+      message: 'Real AI analysis not yet implemented. Please integrate Ollama vision model.',
+      details: {
+        required_steps: [
+          'Install Ollama: https://ollama.ai',
+          'Pull vision model: ollama pull qwen2-vl or ollama pull llava',
+          'Implement analyzeWithOllama() function',
+          'Configure OLLAMA_HOST in .env'
+        ]
+      }
+    }
+  });
 });
 
 /**
- * Generate mock visual plant analysis
- * Simulates AI looking at plant images and answering: "Does my plant look healthy?"
+ * Analyze plant health using Ollama vision model
+ * TODO: Implement real Ollama integration
+ * 
+ * Example implementation:
+ * 
+ * const analyzeWithOllama = async (frames, question, context) => {
+ *   const ollamaHost = process.env.OLLAMA_HOST || 'http://localhost:11434';
+ *   const model = process.env.OLLAMA_MODEL || 'llava';
+ *   
+ *   const response = await fetch(`${ollamaHost}/api/generate`, {
+ *     method: 'POST',
+ *     headers: { 'Content-Type': 'application/json' },
+ *     body: JSON.stringify({
+ *       model: model,
+ *       prompt: buildPlantAnalysisPrompt(question, context),
+ *       images: frames.map(f => f.replace(/^data:image\/\w+;base64,/, '')),
+ *       stream: false
+ *     })
+ *   });
+ *   
+ *   const data = await response.json();
+ *   return parseOllamaResponse(data.response, context);
+ * };
  */
-function generateVisualAnalysis(frames, question, context) {
-  // Simulate visual inspection results (in real AI, this would analyze the actual images)
-  // For now, randomize results to simulate different visual conditions
-  const visualScores = {
-    leafColor: 0.7 + Math.random() * 0.3, // 70-100%
-    leafTexture: 0.6 + Math.random() * 0.4,
-    leafSize: 0.7 + Math.random() * 0.3,
-    overallAppearance: 0.65 + Math.random() * 0.35
-  };
-
-  const avgScore = Object.values(visualScores).reduce((a, b) => a + b) / 4;
-  
-  let overallHealth = 'Great';
-  let primaryIssue = null;
-  let severity = 'none';
-  let confidence = 0.80 + Math.random() * 0.15;
-  const symptoms = [];
-  const recommendations = [];
-
-  // Simulate different visual conditions
-  if (avgScore < 0.5) {
-    overallHealth = 'Needs Attention';
-    primaryIssue = 'Visual signs of stress detected';
-    severity = 'high';
-    confidence = 0.88;
-    symptoms.push({
-      symptom: 'Discolored leaves',
-      severity: 'high',
-      affected_area: 'Lower leaves',
-      confidence: 0.85
-    });
-    symptoms.push({
-      symptom: 'Possible nutrient deficiency',
-      severity: 'moderate',
-      affected_area: 'New growth',
-      confidence: 0.72
-    });
-    recommendations.push({
-      action: 'Check plant care routine',
-      priority: 'high',
-      details: 'Plant shows visual signs of stress. Check watering schedule and light exposure.',
-      estimated_recovery_time: '1-2 weeks'
-    });
-  } else if (avgScore < 0.7) {
-    overallHealth = 'Fair';
-    primaryIssue = 'Minor visual issues observed';
-    severity = 'moderate';
-    confidence = 0.82;
-    symptoms.push({
-      symptom: 'Slight leaf drooping',
-      severity: 'mild',
-      affected_area: 'Some leaves',
-      confidence: 0.78
-    });
-    recommendations.push({
-      action: 'Monitor plant closely',
-      priority: 'medium',
-      details: 'Plant looks generally okay but shows minor stress signs. Keep observing.',
-      estimated_recovery_time: '3-7 days'
-    });
-  } else if (avgScore < 0.85) {
-    overallHealth = 'Good';
-    primaryIssue = 'Plant appears healthy';
-    severity = 'low';
-    confidence = 0.85;
-    symptoms.push({
-      symptom: 'Healthy appearance',
-      severity: 'none',
-      affected_area: 'Overall plant',
-      confidence: 0.90
-    });
-    recommendations.push({
-      action: 'Continue current care',
-      priority: 'low',
-      details: 'Plant looks good! Maintain your current care routine.',
-      estimated_recovery_time: 'N/A'
-    });
-  } else {
-    overallHealth = 'Great';
-    primaryIssue = 'Plant thriving';
-    severity = 'none';
-    confidence = 0.92;
-    symptoms.push({
-      symptom: 'Vibrant, healthy foliage',
-      severity: 'none',
-      affected_area: 'All leaves',
-      confidence: 0.95
-    });
-    recommendations.push({
-      action: 'Keep up the great work',
-      priority: 'low',
-      details: 'Your plant looks fantastic! Whatever you\'re doing is working perfectly.',
-      estimated_recovery_time: 'N/A'
-    });
-  }
-
-  return {
-    success: true,
-    timestamp: new Date().toISOString(),
-    health_assessment: {
-      overall_health: overallHealth,
-      confidence: confidence,
-      visual_symptoms: symptoms,
-      visual_scores: visualScores,
-      frames_analyzed: frames.length,
-      diagnosis: {
-        primary_issue: primaryIssue,
-        contributing_factors: [],
-        confidence: confidence
-      }
-    },
-    care_recommendations: recommendations,
-    metadata: {
-      model_used: 'visual-inspection-v1',
-      processing_time_ms: Math.floor(Math.random() * 800) + 1200,
-      frames_processed: frames.length,
-      question_answered: question
-    }
-  };
-}
 
 /**
  * GET /api/status
