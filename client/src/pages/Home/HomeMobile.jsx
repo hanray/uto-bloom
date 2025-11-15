@@ -14,7 +14,7 @@ import { useAIAssistant } from '../../hooks/useAIAssistant';
  */
 function HomeMobile({ plant, status, lastReading, chartData, loading, statusConfig }) {
   const plantData = { plant, status, lastReading };
-  const { aiStatus, hasCamera, responses, apiError, videoRef, startAI, stopAI, clearResponses, takeSnapshot } = useAIAssistant(plantData, 'mobile');
+  const { aiStatus, hasCamera, responses, apiError, isAnalyzing, analysisProgress, videoRef, startAI, stopAI, clearResponses, takeSnapshot } = useAIAssistant(plantData, 'mobile');
 
   const handleAIClick = () => {
     if (aiStatus === 'idle') {
@@ -125,12 +125,36 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
 
         {/* Metrics Grid */}
         <div className="figma-mobile-metrics">
-          <div className="figma-mobile-metric-tile purple-tile" onClick={handleAIClick} style={{ cursor: 'pointer' }}>
-            <div className="figma-mobile-metric-icon">✨</div>
-            <p className="figma-mobile-metric-label">AI Assistant</p>
-            <p className="figma-mobile-metric-value" style={{ fontSize: '0.75rem' }}>
-              {aiStatus === 'idle' ? 'Tap' : aiStatus === 'active' ? 'Active' : aiStatus}
-            </p>
+          <div className="figma-mobile-metric-tile purple-tile" onClick={handleAIClick} style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
+            {aiStatus === 'active' && (
+              <video ref={videoRef} autoPlay playsInline muted style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.3 }} />
+            )}
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div className="figma-mobile-metric-icon">✨</div>
+              <p className="figma-mobile-metric-label">AI Assistant</p>
+              <p className="figma-mobile-metric-value" style={{ fontSize: '0.75rem' }}>
+                {aiStatus === 'idle' ? 'Tap to Start' : aiStatus === 'active' ? 'Camera Ready' : aiStatus}
+              </p>
+              {aiStatus === 'active' && (
+                <button 
+                  onClick={(e) => { e.stopPropagation(); takeSnapshot(); }}
+                  disabled={isAnalyzing}
+                  style={{
+                    marginTop: '8px',
+                    padding: '8px 16px',
+                    background: isAnalyzing ? 'rgba(124,58,237,0.5)' : 'rgba(124,58,237,0.9)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    cursor: isAnalyzing ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {isAnalyzing ? '⏳ Analyzing...' : '📸 Analyze Plant'}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className={`figma-mobile-metric-tile blue-tile ${lastReading?.soil_raw ? 'has-data' : ''}`}>
@@ -198,6 +222,27 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
           </Link>
         </div>
 
+        {/* ANALYSIS PROGRESS INDICATOR */}
+        {analysisProgress && (
+          <div className="ai-progress-indicator" style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'rgba(124, 58, 237, 0.95)',
+            padding: '24px 32px',
+            borderRadius: '16px',
+            color: 'white',
+            fontSize: '1rem',
+            fontWeight: '600',
+            zIndex: 9999,
+            textAlign: 'center',
+            boxShadow: '0 8px 32px rgba(124, 58, 237, 0.5)'
+          }}>
+            {analysisProgress}
+          </div>
+        )}
+
         {/* AI RESPONSES FEED */}
         {responses.length > 0 && (
           <div className="ai-responses-container">
@@ -210,9 +255,6 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
           </div>
         )}
       </div>
-
-      {/* Hidden video element for camera */}
-      <video ref={videoRef} className="ai-video-hidden" playsInline muted />
     </div>
   );
 }

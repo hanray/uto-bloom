@@ -17,11 +17,10 @@ function HomeTV({ plant, status, lastReading, chartData, loading, statusConfig }
   const plantData = { plant, status, lastReading };
   const { aiStatus, hasCamera, responses, showQR, apiError, videoRef, startAI, stopAI, toggleQR, clearResponses, takeSnapshot } = useAIAssistant(plantData, 'tv');
   
-  // QR code points to mobile camera interface for UtoVision API
-  // This allows mobile devices on local network to use their camera for AI analysis
+  // QR code points to mobile web UI on local network
+  // This allows mobile devices to access the full app with camera support
   const localIP = window.location.hostname || 'localhost';
-  const speciesKey = (plant && plant.species_key) ? plant.species_key : 'monstera';
-  const qrUrl = `http://${localIP}:3001/mobile-camera?plant_id=pot-01&species=${speciesKey}`;
+  const qrUrl = `http://${localIP}:5173`;
 
   const handleAIClick = () => {
     if (aiStatus === 'idle') {
