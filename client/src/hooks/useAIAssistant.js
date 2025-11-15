@@ -18,15 +18,19 @@ export function useAIAssistant(plantData, platform = 'desktop') {
   const [stream, setStream] = useState(null);
   const autoCloseTimer = useRef(null);
 
-  // Check for camera on mount (skip for TV)
+  // Check for camera on mount (skip for TV and mobile)
   useEffect(() => {
     const initialize = async () => {
       if (platform === 'tv') {
         console.log('📺 TV platform detected - no camera check');
         setHasCamera(false); // TV doesn't have camera
         setAiStatus('idle');
+      } else if (platform === 'mobile') {
+        console.log('📱 Mobile platform - skipping camera check (requires permission first)');
+        setHasCamera(true); // Assume camera exists, will handle errors during access
+        setAiStatus('idle');
       } else {
-        console.log(`📱 ${platform} platform - checking for camera`);
+        console.log(`💻 ${platform} platform - checking for camera`);
         try {
           const result = await utoVisionAPI.hasCamera();
           console.log(`📷 Camera available: ${result}`);
@@ -71,14 +75,9 @@ export function useAIAssistant(plantData, platform = 'desktop') {
     }
 
     // Desktop/Mobile - use local camera directly
-    if (!hasCamera) {
-      console.log('❌ No camera available');
-      setAiStatus('error');
-      setApiError('No camera detected on this device');
-      return;
-    }
-
-    console.log('📷 Camera available - requesting access');
+    // Note: On mobile, we skip the hasCamera check because some browsers
+    // don't reveal cameras until permission is granted
+    console.log('📷 Requesting camera access');
     setAiStatus('connecting');
     
     try {
