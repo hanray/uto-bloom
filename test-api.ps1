@@ -9,7 +9,8 @@ $headers = @{
 }
 
 $testData = @{
-    image = "data:image/jpeg;base64,test_image_data"
+    frames = @("data:image/jpeg;base64,test_image_data")
+    question = "Does my plant look healthy and well today?"
     context = @{
         plant_id = "pot-01"
         species = "monstera"
