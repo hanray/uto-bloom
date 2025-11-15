@@ -139,7 +139,10 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
               <div className="figma-mobile-metric-icon">✨</div>
               <p className="figma-mobile-metric-label">AI Assistant</p>
               <p className="figma-mobile-metric-value" style={{ fontSize: '0.75rem' }}>
-                {aiStatus === 'idle' ? 'Tap to Start' : aiStatus === 'active' ? 'Camera Ready' : aiStatus}
+                {aiStatus === 'idle' && 'Tap to Start'}
+                {aiStatus === 'connecting' && 'Connecting...'}
+                {aiStatus === 'active' && 'Camera Ready'}
+                {aiStatus === 'error' && 'Error - Tap for details'}
               </p>
               {aiStatus === 'active' && (
                 <button 
@@ -159,6 +162,17 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
                 >
                   {isAnalyzing ? '⏳ Analyzing...' : '📸 Analyze Plant'}
                 </button>
+              )}
+              {aiStatus === 'error' && apiError && (
+                <p style={{
+                  marginTop: '8px',
+                  fontSize: '0.65rem',
+                  color: '#ff6b6b',
+                  lineHeight: '1.3',
+                  maxWidth: '100%'
+                }}>
+                  {apiError}
+                </p>
               )}
             </div>
           </div>
