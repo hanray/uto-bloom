@@ -3,7 +3,7 @@
  * Handles camera access, API communication, and AI analysis
  */
 
-const UTOVISION_API_URL = 'http://localhost:3001';
+const UTOVISION_API_URL = '/utovision';
 const API_KEY = 'sk_dev_utobloom_2025';
 const USE_MOCK_MODE = false; // Set to false - only use real API responses
 
@@ -154,7 +154,7 @@ class UtoVisionAPI {
       console.error('❌ API Fetch Error:', error);
       // Check if it's a network error
       if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-        throw new Error('Cannot connect to AI API. Please ensure UtoVision API server is running on localhost:3001');
+        throw new Error('Cannot connect to AI API. Please ensure UtoVision API server is running');
       }
       throw error;
     }

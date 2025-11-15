@@ -133,7 +133,7 @@ export function useAIAssistant(plantData, platform = 'desktop') {
       
       // Report error to server for debugging
       try {
-        await fetch('http://localhost:3000/api/client-error', {
+        await fetch('/api/client-error', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
