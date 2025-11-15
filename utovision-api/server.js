@@ -15,7 +15,12 @@ const PORT = process.env.PORT || 3001;
 const API_KEY = process.env.API_KEY || 'sk_dev_utobloom_2025';
 const USE_REAL_AI = process.env.USE_REAL_AI === 'true';
 const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llava:latest';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen3-vl:32b';
+
+// Model selection - Fast model for simple queries, powerful model for complex analysis
+const FAST_MODEL = 'qwen3-vl:8b';    // 6.1GB, ~2-3s analysis
+const SMART_MODEL = 'qwen3-vl:32b';  // 20GB, ~60-100s analysis
+const ENABLE_SMART_ROUTING = process.env.ENABLE_SMART_ROUTING !== 'false'; // Default: enabled
 
 // Initialize Ollama client
 const ollama = new Ollama({ host: OLLAMA_HOST });
@@ -148,11 +153,73 @@ app.post('/api/analyze/plant', validateApiKey, (req, res) => {
  */
 
 /**
+ * Smart model selection based on query complexity
+ * Simple queries use fast model, complex analysis uses powerful model
+ */
+function selectModel(question, context) {
+  if (!ENABLE_SMART_ROUTING) {
+    console.log(`🔀 Smart routing disabled - using: ${OLLAMA_MODEL}`);
+    return OLLAMA_MODEL;
+  }
+
+  const questionLower = question.toLowerCase();
+  
+  // Simple queries - use fast model (8b)
+  const simpleKeywords = [
+    'look healthy',
+    'is my plant',
+    'quick check',
+    'status',
+    'color',
+    'how is',
+    'doing well'
+  ];
+  
+  // Complex queries - use smart model (32b)
+  const complexKeywords = [
+    'disease',
+    'pest',
+    'diagnosis',
+    'identify',
+    'what is wrong',
+    'problem',
+    'yellowing',
+    'brown spots',
+    'wilting',
+    'treatment',
+    'cure',
+    'detailed analysis'
+  ];
+
+  // Check for complex indicators
+  const isComplex = complexKeywords.some(keyword => questionLower.includes(keyword));
+  const isSimple = simpleKeywords.some(keyword => questionLower.includes(keyword));
+
+  // Decision logic
+  if (isComplex) {
+    console.log(`🧠 Complex query detected - using SMART model: ${SMART_MODEL}`);
+    console.log(`   Reason: Requires detailed analysis`);
+    return SMART_MODEL;
+  } else if (isSimple || questionLower.length < 50) {
+    console.log(`⚡ Simple query detected - using FAST model: ${FAST_MODEL}`);
+    console.log(`   Reason: Quick health check`);
+    return FAST_MODEL;
+  } else {
+    // Default to fast model for general queries
+    console.log(`⚡ General query - using FAST model: ${FAST_MODEL}`);
+    return FAST_MODEL;
+  }
+}
+
+/**
  * Analyze plant health using Ollama vision model
  */
 async function analyzeWithOllama(frames, question, context, options, res, startTime) {
   try {
     console.log('🤖 Starting Ollama analysis...');
+    
+    // Smart model selection
+    const selectedModel = selectModel(question, context);
     
     // Build the prompt with plant context
     const prompt = buildPlantAnalysisPrompt(question, context);
@@ -162,16 +229,16 @@ async function analyzeWithOllama(frames, question, context, options, res, startT
       frame.replace(/^data:image\/\w+;base64,/, '')
     );
     
-    console.log(`📤 Sending to Ollama: ${OLLAMA_MODEL}`);
+    console.log(`📤 Sending to Ollama: ${selectedModel}`);
     console.log(`   Prompt: ${prompt.substring(0, 100)}...`);
     console.log(`   Images: ${cleanedFrames.length} frames`);
     console.log(`   ⏳ Processing... (this may take 10-60 seconds)`);
     
     const analyzeStart = Date.now();
     
-    // Call Ollama API
+    // Call Ollama API with selected model
     const response = await ollama.generate({
-      model: OLLAMA_MODEL,
+      model: selectedModel,
       prompt: prompt,
       images: cleanedFrames,
       stream: false
