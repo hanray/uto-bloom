@@ -127,7 +127,13 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
         <div className="figma-mobile-metrics">
           <div className="figma-mobile-metric-tile purple-tile" onClick={handleAIClick} style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
             {aiStatus === 'active' && (
-              <video ref={videoRef} autoPlay playsInline muted style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.3 }} />
+              <video 
+                ref={aiStatus === 'active' ? videoRef : null}
+                autoPlay 
+                playsInline 
+                muted 
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.3 }} 
+              />
             )}
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div className="figma-mobile-metric-icon">✨</div>
@@ -255,6 +261,9 @@ function HomeMobile({ plant, status, lastReading, chartData, loading, statusConf
           </div>
         )}
       </div>
+
+      {/* Hidden video element for initial camera attachment */}
+      {aiStatus !== 'active' && <video ref={videoRef} style={{ display: 'none' }} playsInline muted />}
     </div>
   );
 }
