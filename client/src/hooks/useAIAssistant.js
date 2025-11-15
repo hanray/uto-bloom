@@ -132,9 +132,23 @@ export function useAIAssistant(plantData, platform = 'desktop') {
     } catch (error) {
       console.error('❌ Failed to start AI:', error);
       setAiStatus('error');
+      
+      // More helpful error message
+      let errorMsg = 'Failed to access camera. ';
+      if (error.message.includes('Permission denied') || error.name === 'NotAllowedError') {
+        errorMsg += 'Please allow camera access in your browser settings.';
+      } else if (error.name === 'NotFoundError') {
+        errorMsg += 'No camera detected on this device.';
+      } else if (error.name === 'NotReadableError') {
+        errorMsg += 'Camera is already in use by another app.';
+      } else {
+        errorMsg += error.message || 'Unknown error.';
+      }
+      
+      setApiError(errorMsg);
       addResponse({
         type: 'error',
-        message: 'Failed to access camera. Please check permissions.',
+        message: errorMsg,
         timestamp: Date.now()
       });
     }

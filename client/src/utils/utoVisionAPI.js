@@ -33,20 +33,36 @@ class UtoVisionAPI {
 
   /**
    * Request camera access
+   * Mobile-friendly: tries back camera first, falls back to any camera
    */
   async requestCameraAccess() {
     try {
+      // Try back camera first (better for plant photos on mobile)
+      console.log('📱 Requesting back camera...');
       this.stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: 'environment' // Prefer back camera on mobile
-        }
+          width: { ideal: 1280, max: 1920 },
+          height: { ideal: 720, max: 1080 },
+          facingMode: { ideal: 'environment' } // Prefer back camera, but don't require it
+        },
+        audio: false
       });
+      console.log('✅ Camera access granted');
       return this.stream;
     } catch (error) {
-      console.error('Camera access denied:', error);
-      throw new Error('Camera access denied');
+      console.warn('⚠️ Back camera failed, trying any camera...', error);
+      // Fallback: try any camera without constraints
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+        console.log('✅ Camera access granted (fallback)');
+        return this.stream;
+      } catch (fallbackError) {
+        console.error('❌ Camera access denied:', fallbackError);
+        throw new Error('Camera access denied. Please check browser permissions.');
+      }
     }
   }
 
