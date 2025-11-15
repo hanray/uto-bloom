@@ -4,7 +4,6 @@ import PlantVisualization from '../../components/PlantVisualization';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import StatusIndicator from '../../components/StatusIndicator';
 import { HomeIcon, HistoryIcon, DetailsIcon, SettingsIcon } from '../../components/NavIcon';
-import QRCodeModal from '../../components/QRCodeModal';
 import AIResponsesFeed from '../../components/AIResponsesFeed';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
 import logo from '../../icons/uto-labs-logo4x.png';
@@ -19,11 +18,15 @@ import logo from '../../icons/uto-labs-logo4x.png';
  */
 function HomeDesktop({ plant, status, lastReading, chartData, loading, statusConfig }) {
   const plantData = { plant, status, lastReading };
-  const { aiStatus, hasCamera, responses, showQR, videoRef, startAI, stopAI, toggleQR, clearResponses } = useAIAssistant(plantData, 'desktop');
-  
-  const qrUrl = `${window.location.origin}/ai-assistant?plant=pot-01`;
+  const { aiStatus, hasCamera, responses, apiError, videoRef, startAI, stopAI, clearResponses, takeSnapshot } = useAIAssistant(plantData, 'desktop');
 
   const handleAIClick = () => {
+    // Don't allow interaction while initializing
+    if (aiStatus === 'initializing') {
+      console.log('⏳ Still initializing, please wait...');
+      return;
+    }
+    
     if (aiStatus === 'idle') {
       startAI();
     } else if (aiStatus === 'active') {
@@ -104,6 +107,7 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
           </div>
           <div className={`ai-status-indicator ${aiStatus}`}>
             <span className="ai-status-dot"></span>
+            {aiStatus === 'initializing' && 'Initializing AI Assistant...'}
             {aiStatus === 'idle' && `Last updated ${lastReading?.last_seen 
               ? new Date(lastReading.last_seen).toLocaleTimeString('en-US', {
                   hour: 'numeric',
@@ -113,7 +117,7 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
               : '09:24 PM'}`}
             {aiStatus === 'connecting' && 'AI Assistant connecting...'}
             {aiStatus === 'active' && 'AI Assistant active • Analyzing plant'}
-            {aiStatus === 'error' && 'AI Assistant error • Check permissions'}
+            {aiStatus === 'error' && 'AI Assistant error • Check status bar'}
           </div>
         </header>
 
@@ -121,7 +125,9 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
         <div className="content-full figma-status-row">
           <StatusIndicator 
             status={status} 
-            statusConfig={statusConfig} 
+            statusConfig={statusConfig}
+            apiError={apiError}
+            lastUpdated={lastReading?.timestamp}
           />
         </div>
 
@@ -136,22 +142,30 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
               </div>
               <p className="figma-metric-label">AI Assistant</p>
               <p className="figma-metric-value" style={{ fontSize: '0.75rem' }}>
+                {aiStatus === 'initializing' && 'Initializing...'}
                 {aiStatus === 'idle' && 'Click to start'}
                 {aiStatus === 'connecting' && 'Starting...'}
                 {aiStatus === 'active' && 'Active'}
-                {aiStatus === 'error' && 'Error'}
+                {aiStatus === 'error' && 'Error - Check status'}
               </p>
             </div>
 
             {/* BLUE Moisture Tile */}
-            <div className="figma-metric-tile blue-tile">
+            <div className={`figma-metric-tile blue-tile ${lastReading?.soil_raw ? 'has-data' : ''}`}>
               <div className="figma-metric-icon-circle">
                 <span className="figma-metric-icon">💧</span>
               </div>
               <p className="figma-metric-label">Moisture</p>
               <p className="figma-metric-value">
-                {lastReading?.moisture_level?.toFixed(0) || '32'}%
+                {lastReading?.soil_raw ? `${Math.round((lastReading.soil_raw / 1023) * 100)}%` : 'Not Connected'}
               </p>
+              {lastReading?.soil_raw && (
+                <div className="bubble-container">
+                  <div className="bubble bubble-1"></div>
+                  <div className="bubble bubble-2"></div>
+                  <div className="bubble bubble-3"></div>
+                </div>
+              )}
             </div>
 
             {/* ORANGE Temperature Tile */}
@@ -182,7 +196,7 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
             <div className="figma-plant-container">
               <PlantVisualization 
                 species={plant?.species_key || 'monstera'} 
-                health={(lastReading?.moisture_level || 50) / 100}
+                health={(lastReading?.soil_raw || 512) / 1023}
               />
             </div>
           </div>
@@ -191,12 +205,26 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
         {/* AI RESPONSES FEED - Full Width Row */}
         {responses.length > 0 && (
           <div className="content-full ai-responses-container">
-            <button className="ai-responses-close" onClick={clearResponses}>×</button>
             <div className="ai-responses-header">
               <h3 className="ai-responses-title">
                 🤖 AI Assistant Insights
               </h3>
+              <div 
+                className={`ai-camera-led ${aiStatus === 'active' ? 'active' : 'inactive'}`}
+                onClick={aiStatus !== 'active' ? startAI : undefined}
+                title={aiStatus === 'active' ? 'Camera connected' : 'Click to restart camera'}
+                style={{ cursor: aiStatus !== 'active' ? 'pointer' : 'default' }}
+              />
+              <button 
+                className="ai-snapshot-button" 
+                onClick={takeSnapshot}
+                disabled={aiStatus !== 'active'}
+                title="Take snapshot and analyze"
+              >
+                📸 Analyze Now
+              </button>
               <span className="ai-responses-count">{responses.length}/10</span>
+              <button className="ai-responses-close" onClick={clearResponses}>×</button>
             </div>
             <AIResponsesFeed responses={responses} />
           </div>
@@ -255,9 +283,6 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
 
       {/* Hidden video element for camera */}
       <video ref={videoRef} className="ai-video-hidden" playsInline />
-
-      {/* QR Code Modal */}
-      <QRCodeModal isOpen={showQR} onClose={toggleQR} url={qrUrl} />
     </div>
   );
 }

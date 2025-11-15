@@ -22,11 +22,34 @@
   flex-shrink: 0;
 }
 
+.status-indicator__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
 .status-indicator__text {
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
   margin: 0;
+}
+
+.status-indicator__error {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  margin: 0;
+  font-family: monospace;
+}
+
+.status-indicator__timestamp {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  margin: 0;
+  opacity: 0.8;
 }
 
 /* Compact variant for smaller spaces */

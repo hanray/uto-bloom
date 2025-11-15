@@ -24,18 +24,18 @@ const STATUS = {
 const THRESHOLDS = {
   DRY: 250,        // Below this = dry
   FINE_MIN: 250,   // Fine range start
-  GREAT_MIN: 450,  // Great range start
-  GREAT_MAX: 850,  // Great range end (changed from 800)
-  SOAKED: 850      // Above this = over-wet
+  OKAY_MIN: 450,   // Okay range start
+  GREAT_MIN: 600,  // Great range start
+  SOAKED: 1024     // Above max (effectively disabled)
 };
 
 /**
  * Compute status from current reading
- * Per BRD (updated rules):
- * - Need water: raw < 250
- * - I'm doing fine: 250 ≤ raw < 450
- * - I'm doing great: 450 ≤ raw < 850
- * - Over-wet: raw ≥ 850 (contributes to care)
+ * Updated rules:
+ * - Need water: raw < 250 (dry)
+ * - Getting low but I'm okay: 250 ≤ raw < 450
+ * - I'm okay: 450 ≤ raw < 600
+ * - I'm doing great: raw ≥ 600
  * 
  * Note: For MVP single-document model, we simplify to instant status
  */
@@ -43,19 +43,19 @@ function computeStatus(soilRaw, tempC = null) {
   let status = STATUS.FINE;
   let reason = '';
   
-  // Moisture bands per BRD
+  // Moisture bands
   if (soilRaw < 250) {
     status = STATUS.NEED_WATER;
     reason = 'Soil moisture is low - time to water';
   } else if (soilRaw >= 250 && soilRaw < 450) {
     status = STATUS.FINE;
-    reason = 'Soil moisture is okay';
-  } else if (soilRaw >= 450 && soilRaw < 850) {
+    reason = 'Getting low but I\'m okay';
+  } else if (soilRaw >= 450 && soilRaw < 600) {
+    status = STATUS.FINE;
+    reason = 'I\'m okay';
+  } else if (soilRaw >= 600) {
     status = STATUS.GREAT;
-    reason = 'Soil moisture is perfect!';
-  } else if (soilRaw >= 850) {
-    status = STATUS.OVER_WET;
-    reason = 'Soil is very wet - let it dry out';
+    reason = 'I\'m doing great!';
   }
   
   // Temperature checks (if available)
@@ -69,8 +69,8 @@ function computeStatus(soilRaw, tempC = null) {
     }
   }
   
-  // Composite: Over-wet OR multiple issues = CARE
-  if (soilRaw >= 850 || (status === STATUS.COLD && soilRaw < 300)) {
+  // Only extreme temp issues trigger CARE now
+  if ((status === STATUS.COLD || status === STATUS.HOT) && soilRaw < 250) {
     status = STATUS.CARE;
     reason = 'Multiple issues detected - needs attention!';
   }

@@ -146,8 +146,8 @@ class UtoVisionAPI {
 
   /**
    * Analyze plant health with visual inspection (3 frames)
-   * Sends: "Does my plant look healthy and well today?" + images
-   * NO sensor data - pure visual analysis
+   * Sends: "Does my plant look healthy and well today?" + images + soil moisture
+   * Combines visual analysis with current soil moisture reading
    */
   async analyzeHealth(frames, plantContext) {
     console.log('🔬 Starting visual plant health analysis');
@@ -156,14 +156,20 @@ class UtoVisionAPI {
       console.log(`   Frame ${i + 1}: ${frame.length} bytes`);
     });
     console.log('   🌱 Question: "Does my plant look healthy and well today?"');
+    console.log('   📊 Sensor data:', {
+      soil_raw: plantContext.soil_raw
+    });
     
     try {
       const result = await this._fetch('/api/analyze/plant', 'POST', {
         frames: frames, // Send 3 frames for better analysis
-        question: "Does my plant look healthy and well today?",
+        question: `Does my plant look healthy and well today? The soil moisture sensor reads ${plantContext.soil_raw || 'N/A'} (0-1023 scale, where higher = wetter).`,
         context: {
           plant_id: plantContext.plant_id || 'pot-01',
-          species: plantContext.species || 'unknown'
+          species: plantContext.species || 'unknown',
+          sensor_data: {
+            soil_moisture_raw: plantContext.soil_raw
+          }
         },
         options: {
           include_care_recommendations: true,

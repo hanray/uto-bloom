@@ -120,7 +120,7 @@ export function usePlantData() {
   const getStatusConfig = (status) => {
     const configs = {
       need_water: { emoji: '💧', text: "I'm in need of water.", color: '#ef4444' },
-      great: { emoji: '🌟', text: "I'm doing great!", color: '#10b981' },
+      great: { emoji: '🌟', text: "I'm doing great!", color: '#0da271' },
       fine: { emoji: '✅', text: "I'm doing fine.", color: '#3b82f6' },
       cold: { emoji: '🥶', text: "I'm cold.", color: '#60a5fa' },
       hot: { emoji: '🔥', text: "I'm hot.", color: '#f97316' },

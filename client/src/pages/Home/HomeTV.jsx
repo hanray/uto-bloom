@@ -15,13 +15,17 @@ import { useAIAssistant } from '../../hooks/useAIAssistant';
  */
 function HomeTV({ plant, status, lastReading, chartData, loading, statusConfig }) {
   const plantData = { plant, status, lastReading };
-  const { aiStatus, hasCamera, responses, showQR, videoRef, startAI, stopAI, toggleQR, clearResponses } = useAIAssistant(plantData, 'tv');
+  const { aiStatus, hasCamera, responses, showQR, apiError, videoRef, startAI, stopAI, toggleQR, clearResponses, takeSnapshot } = useAIAssistant(plantData, 'tv');
   
-  const qrUrl = `${window.location.origin}/ai-assistant?plant=pot-01`;
+  // QR code points to mobile camera interface for UtoVision API
+  // This allows mobile devices on local network to use their camera for AI analysis
+  const localIP = window.location.hostname || 'localhost';
+  const speciesKey = (plant && plant.species_key) ? plant.species_key : 'monstera';
+  const qrUrl = `http://${localIP}:3001/mobile-camera?plant_id=pot-01&species=${speciesKey}`;
 
   const handleAIClick = () => {
     if (aiStatus === 'idle') {
-      startAI();
+      startAI(); // This will automatically show QR in TV mode
     } else if (aiStatus === 'active') {
       stopAI();
     }
@@ -218,14 +222,21 @@ function HomeTV({ plant, status, lastReading, chartData, loading, statusConfig }
               </div>
 
               {/* BLUE Moisture Tile */}
-              <div className="figma-metric-tile blue-tile" tabIndex={0}>
+              <div className={`figma-metric-tile blue-tile ${lastReading?.soil_raw ? 'has-data' : ''}`} tabIndex={0}>
                 <div className="figma-metric-icon-circle">
                   <span className="figma-metric-icon">💧</span>
                 </div>
                 <p className="figma-metric-label">Moisture</p>
                 <p className="figma-metric-value">
-                  {lastReading?.moisture_level?.toFixed(0) || '32'}%
+                  {lastReading?.soil_raw ? `${Math.round((lastReading.soil_raw / 1023) * 100)}%` : 'Not Connected'}
                 </p>
+                {lastReading?.soil_raw && (
+                  <div className="bubble-container">
+                    <div className="bubble bubble-1"></div>
+                    <div className="bubble bubble-2"></div>
+                    <div className="bubble bubble-3"></div>
+                  </div>
+                )}
               </div>
 
               {/* ORANGE Temperature Tile */}
@@ -256,7 +267,7 @@ function HomeTV({ plant, status, lastReading, chartData, loading, statusConfig }
               <div className="figma-plant-container">
                 <PlantVisualization 
                   species={plant?.species_key || 'monstera'} 
-                  health={(lastReading?.moisture_level || 50) / 100}
+                  health={(lastReading?.soil_raw || 512) / 1023}
                   height={420}
                 />
               </div>
@@ -308,6 +319,20 @@ function HomeTV({ plant, status, lastReading, chartData, loading, statusConfig }
                 <h3 className="ai-responses-title">
                   🤖 AI Assistant Insights
                 </h3>
+                <div 
+                  className={`ai-camera-led ${aiStatus === 'active' ? 'active' : 'inactive'}`}
+                  onClick={aiStatus !== 'active' ? startAI : undefined}
+                  title={aiStatus === 'active' ? 'Camera connected' : 'Click to restart camera'}
+                  style={{ cursor: aiStatus !== 'active' ? 'pointer' : 'default' }}
+                />
+                <button 
+                  className="ai-snapshot-button" 
+                  onClick={takeSnapshot}
+                  disabled={aiStatus !== 'active'}
+                  title="Take snapshot and analyze"
+                >
+                  📸 Analyze Now
+                </button>
                 <span className="ai-responses-count">{responses.length}/10</span>
               </div>
               <AIResponsesFeed responses={responses} />

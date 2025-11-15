@@ -7,25 +7,37 @@ import utoVisionAPI from '../utils/utoVisionAPI';
  * @param {string} platform - Platform type: 'desktop', 'mobile', or 'tv'
  */
 export function useAIAssistant(plantData, platform = 'desktop') {
-  const [aiStatus, setAiStatus] = useState('idle'); // idle, connecting, active, error
+  const [aiStatus, setAiStatus] = useState('initializing'); // initializing, idle, connecting, active, error
   const [hasCamera, setHasCamera] = useState(null);
   const [responses, setResponses] = useState([]);
   const [showQR, setShowQR] = useState(false);
+  const [apiError, setApiError] = useState(null);
   const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
+  const autoCloseTimer = useRef(null);
 
   // Check for camera on mount (skip for TV)
   useEffect(() => {
-    if (platform === 'tv') {
-      console.log('📺 TV platform detected - no camera check');
-      setHasCamera(false); // TV doesn't have camera
-    } else {
-      console.log(`📱 ${platform} platform - checking for camera`);
-      utoVisionAPI.hasCamera().then((result) => {
-        console.log(`📷 Camera available: ${result}`);
-        setHasCamera(result);
-      });
-    }
+    const initialize = async () => {
+      if (platform === 'tv') {
+        console.log('📺 TV platform detected - no camera check');
+        setHasCamera(false); // TV doesn't have camera
+        setAiStatus('idle');
+      } else {
+        console.log(`📱 ${platform} platform - checking for camera`);
+        try {
+          const result = await utoVisionAPI.hasCamera();
+          console.log(`📷 Camera available: ${result}`);
+          setHasCamera(result);
+          setAiStatus('idle');
+        } catch (error) {
+          console.error('❌ Camera check failed:', error);
+          setHasCamera(false);
+          setAiStatus('idle');
+        }
+      }
+    };
+    initialize();
   }, [platform]);
 
   // Cleanup on unmount
@@ -34,34 +46,33 @@ export function useAIAssistant(plantData, platform = 'desktop') {
       if (stream) {
         utoVisionAPI.stopCamera();
       }
+      if (autoCloseTimer.current) {
+        clearTimeout(autoCloseTimer.current);
+      }
     };
   }, [stream]);
 
   const startAI = useCallback(async () => {
     console.log(`🚀 Starting AI Assistant (platform: ${platform})`);
     
-    // TV platform - always show QR code
+    // TV platform - always show QR code for mobile connection
     if (platform === 'tv') {
-      console.log('📺 TV detected - showing QR code');
+      console.log('📺 TV detected - showing QR code for mobile device connection');
       setShowQR(true);
       setAiStatus('idle');
       addResponse({
         type: 'info',
-        message: '📱 Scan QR code with your mobile device to activate AI analysis',
+        message: '📱 Scan QR code with your mobile device to connect and use its camera for AI analysis',
         timestamp: Date.now()
       });
       return;
     }
 
-    // Desktop/Mobile - check camera availability
+    // Desktop/Mobile - use local camera directly
     if (!hasCamera) {
-      console.log('❌ No camera available - showing QR code');
-      setShowQR(true);
-      addResponse({
-        type: 'info',
-        message: 'No camera detected. Scan QR code to use your mobile device.',
-        timestamp: Date.now()
-      });
+      console.log('❌ No camera available');
+      setAiStatus('error');
+      setApiError('No camera detected on this device');
       return;
     }
 
@@ -86,14 +97,22 @@ export function useAIAssistant(plantData, platform = 'desktop') {
       setAiStatus('active');
       console.log('✅ AI Assistant active');
 
+      // Set 2-minute auto-close timer
+      autoCloseTimer.current = setTimeout(() => {
+        console.log('⏰ 2-minute timer expired - closing AI Assistant');
+        stopAI();
+        addResponse({
+          type: 'info',
+          message: '⏰ AI Assistant closed after 2 minutes. Click to restart.',
+          timestamp: Date.now()
+        });
+      }, 2 * 60 * 1000); // 2 minutes
+
       // Start continuous analysis
       const plantContext = {
         plant_id: 'pot-01',
         species: plantData?.plant?.species_key || 'monstera',
-        moisture: plantData?.lastReading?.moisture_level,
-        temperature: plantData?.lastReading?.temperature,
-        humidity: plantData?.lastReading?.humidity,
-        light: plantData?.lastReading?.light_lux,
+        soil_raw: plantData?.lastReading?.soil_raw,
         lastWatered: plantData?.plant?.last_watered,
         healthStatus: plantData?.status
       };
@@ -128,6 +147,10 @@ export function useAIAssistant(plantData, platform = 'desktop') {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    if (autoCloseTimer.current) {
+      clearTimeout(autoCloseTimer.current);
+      autoCloseTimer.current = null;
+    }
     setAiStatus('idle');
   }, [stream]);
 
@@ -157,26 +180,67 @@ export function useAIAssistant(plantData, platform = 'desktop') {
     }
 
     if (recommendations && recommendations.length > 0) {
-      const topRec = recommendations[0];
-      addResponse({
-        type: 'analysis',
-        message: `💡 ${topRec.action}: ${topRec.details}`,
-        timestamp: Date.now()
+      // recommendations is an array of strings
+      recommendations.forEach((rec, index) => {
+        if (rec && rec.trim()) {
+          addResponse({
+            type: 'analysis',
+            message: `💡 ${rec}`,
+            timestamp: Date.now() + index // Slight offset to maintain order
+          });
+        }
       });
     }
   }, [addResponse]);
 
   const handleAnalysisError = useCallback((error) => {
-    addResponse({
-      type: 'error',
-      message: `Analysis failed: ${error.message}`,
-      timestamp: Date.now()
-    });
-  }, [addResponse]);
+    console.error('❌ AI Analysis error:', error);
+    // Set API error to show in status indicator instead of chat
+    setApiError(error.message || 'Unknown error occurred');
+    setAiStatus('error');
+  }, []);
 
   const clearResponses = useCallback(() => {
     setResponses([]);
   }, []);
+
+  const takeSnapshot = useCallback(async () => {
+    if (!videoRef.current || aiStatus !== 'active') {
+      console.warn('⚠️ Cannot take snapshot - camera not active');
+      return;
+    }
+
+    console.log('📸 Taking manual snapshot...');
+    setApiError(null); // Clear any previous errors
+
+    try {
+      const plantContext = {
+        plant_id: 'pot-01',
+        species: plantData?.plant?.species_key || 'monstera',
+        soil_raw: plantData?.lastReading?.soil_raw,
+        lastWatered: plantData?.plant?.last_watered,
+        healthStatus: plantData?.status
+      };
+
+      addResponse({
+        type: 'info',
+        message: '📸 Capturing snapshot and analyzing...',
+        timestamp: Date.now()
+      });
+
+      // Capture 3 frames from video
+      const frames = await utoVisionAPI.capture3Frames(videoRef.current);
+      console.log(`✅ Captured ${frames.length} frames`);
+
+      // Send to API
+      const result = await utoVisionAPI.analyzeHealth(frames, plantContext);
+
+      handleAnalysisResult(result);
+    } catch (error) {
+      console.error('❌ Snapshot failed:', error);
+      handleAnalysisError(error);
+    }
+  }, [aiStatus, plantData, addResponse, handleAnalysisResult, handleAnalysisError]);
 
   const toggleQR = useCallback(() => {
     setShowQR(prev => !prev);
@@ -187,10 +251,12 @@ export function useAIAssistant(plantData, platform = 'desktop') {
     hasCamera,
     responses,
     showQR,
+    apiError,
     videoRef,
     startAI,
     stopAI,
     toggleQR,
-    clearResponses
+    clearResponses,
+    takeSnapshot
   };
 }

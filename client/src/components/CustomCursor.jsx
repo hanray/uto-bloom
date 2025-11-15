@@ -5,56 +5,13 @@ export function CustomCursor() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [isTVMode, setIsTVMode] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [showMobileCursor, setShowMobileCursor] = useState(false);
-  const [isOverCanvas, setIsOverCanvas] = useState(false);
 
   useEffect(() => {
-    // Detect TV mode and mobile
+    // Check if TV mode
     const urlParams = new URLSearchParams(window.location.search);
     const tvMode = urlParams.get('tv') === '1';
-    const mobileCheck = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-      || window.innerWidth <= 844;
     
     setIsTVMode(tvMode);
-    setIsMobile(mobileCheck);
-
-    // Mobile: only show on tap
-    if (mobileCheck) {
-      const handleTouchStart = (e) => {
-        const touch = e.touches[0];
-        setMousePosition({ x: touch.clientX, y: touch.clientY });
-        setShowMobileCursor(true);
-        setIsVisible(true);
-
-        // Hide after 800ms
-        setTimeout(() => {
-          setShowMobileCursor(false);
-          setIsVisible(false);
-        }, 800);
-      };
-
-      document.addEventListener('touchstart', handleTouchStart);
-      return () => {
-        document.removeEventListener('touchstart', handleTouchStart);
-      };
-    }
-
-    // Desktop/TV: track mouse movement
-    const updateMousePosition = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-      if (!isVisible) setIsVisible(true);
-
-      // Check if hovering over canvas or chart
-      const target = e.target;
-      const isCanvas = target.tagName === 'CANVAS' || target.closest('canvas') !== null;
-      const isChart = target.closest('.history-chart-wrapper') !== null;
-      setIsOverCanvas(isCanvas || isChart);
-    };
-
-    const handleMouseLeave = () => {
-      setIsVisible(false);
-    };
 
     // TV Mode: Snap cursor to focused element
     if (tvMode) {
@@ -80,6 +37,16 @@ export function CustomCursor() {
       };
     }
 
+    // Desktop/Mobile: Follow mouse normally
+    const updateMousePosition = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      if (!isVisible) setIsVisible(true);
+    };
+
+    const handleMouseLeave = () => {
+      setIsVisible(false);
+    };
+
     window.addEventListener('mousemove', updateMousePosition);
     document.addEventListener('mouseleave', handleMouseLeave);
 
@@ -87,16 +54,13 @@ export function CustomCursor() {
       window.removeEventListener('mousemove', updateMousePosition);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [isVisible, isTVMode]);
+  }, [isVisible]);
 
-  // Don't render on mobile unless tap active
-  if (isMobile && !showMobileCursor) return null;
+  // Don't render if not visible
   if (!isVisible) return null;
-  // Hide cursor over canvas/charts to prevent visual artifacts
-  if (isOverCanvas) return null;
 
-  // TV mode gets snappier, more visible cursor
-  const springConfig = isTVMode 
+  // TV mode gets snappier cursor, desktop/mobile gets smooth following
+  const springConfig = isTVMode
     ? { type: 'spring', stiffness: 800, damping: 35, mass: 0.3 }
     : { type: 'spring', stiffness: 500, damping: 28, mass: 0.5 };
 
@@ -179,22 +143,20 @@ export function CustomCursor() {
             }}
           />
 
-          {/* Center white dot - fixed in center, no lag */}
-          {!isMobile && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.8)',
-                boxShadow: '0 0 10px rgba(139, 92, 246, 0.5)',
-              }}
-            />
-          )}
+          {/* Center white dot */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.8)',
+              boxShadow: '0 0 10px rgba(139, 92, 246, 0.5)',
+            }}
+          />
         </div>
       </motion.div>
     </>

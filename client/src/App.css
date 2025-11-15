@@ -53,6 +53,15 @@
   cursor: none; /* Hide default cursor for custom cursor */
 }
 
+*:focus {
+  cursor: none; /* Keep cursor hidden on focused elements */
+}
+
+/* Restore cursor in TV mode for accessibility */
+.tv-mode * {
+  cursor: default;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: #000000;
@@ -575,6 +584,17 @@ html, body {
   padding: 2rem 1.5rem !important;
   overflow: visible !important;
   max-width: 50rem !important;
+}
+
+/* TV MODE - Viewport-based scaling for History/Details pages (1920px+ only) */
+@media (min-width: 1920px) {
+  .tv-mode .main-content {
+    margin-left: calc(5vw + 4vw);
+    margin-right: 3vw;
+    max-width: none !important;
+    padding: 4vh 3vw 2vh 3vw !important;
+    width: auto;
+  }
 }
 
 /* Remove all 3-column grid layouts - designs show centered single column */
@@ -1189,29 +1209,29 @@ html, body {
   fill: #333;
 }
 
-/* UNIFIED FOCUS SYSTEM - Make focus very visible across all pages */
-.main-content:focus {
+/* UNIFIED FOCUS SYSTEM - Make focus very visible on TV mode only */
+.tv-mode .main-content:focus {
   outline: none;
 }
 
-.details-page a:focus,
-.details-page button:focus,
-.history-page button:focus,
-.home-page button:focus {
+.tv-mode .details-page a:focus,
+.tv-mode .details-page button:focus,
+.tv-mode .history-page button:focus,
+.tv-mode .home-page button:focus {
   outline: 3px solid #ffd700;
   outline-offset: 2px;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
 /* Range selector button focus */
-.range-button:focus {
+.tv-mode .range-button:focus {
   outline: 3px solid #ffd700;
   outline-offset: 2px;
   transform: scale(1.05);
 }
 
 /* Change plant button focus */
-.change-plant-btn:focus {
+.tv-mode .change-plant-btn:focus {
   outline: 3px solid #ffd700;
   outline-offset: 2px;
   transform: scale(1.05);
@@ -1804,6 +1824,14 @@ html, body {
   overflow: hidden;
 }
 
+/* TV MODE - Full viewport layout */
+.figma-tv-mode.figma-desktop-layout {
+  display: block;
+  place-items: unset;
+  padding: 0;
+  overflow-y: auto;
+}
+
 /* Base gradient layer (always visible) */
 .figma-desktop-layout::before {
   content: '';
@@ -1860,15 +1888,10 @@ html, body {
   max-width: 1400px;
 }
 
-/* TV MODE - Full screen, no centering */
-.figma-tv-mode.figma-desktop-layout {
-  display: flex;
-  place-items: unset;
-  padding: 0;
-}
-
+/* TV MODE - Full width wrapper */
 .figma-tv-mode .figma-layout-wrapper {
   max-width: unset;
+  width: 100%;
 }
 
 /* LEFT SIDEBAR - VERTICAL Pill Navigation - Design System Spec */
@@ -1887,6 +1910,27 @@ html, body {
   padding: 12px;
   gap: 12px;
   z-index: 100;
+}
+
+/* TV MODE - Scale sidebar for 4K (1920px+ only) */
+@media (min-width: 1920px) {
+  .figma-tv-mode .figma-sidebar-nav {
+    left: 2vw;
+    top: 10vh;
+    width: 5vw;
+    max-width: 120px;
+    padding: 1vw;
+    gap: 1vw;
+  }
+
+  .figma-tv-mode .figma-nav-btn {
+    width: 3.5vw;
+    height: 3.5vw;
+    max-width: 80px;
+    max-height: 80px;
+    min-width: 48px;
+    min-height: 48px;
+  }
 }
 
 .figma-nav-btn {
@@ -1944,9 +1988,16 @@ html, body {
   gap: 16px;
 }
 
-/* TV MODE - Full width main content */
-.figma-tv-mode .figma-main-content {
-  width: 1145px;
+/* TV MODE - Full viewport width with proper scaling (1920px+ only) */
+@media (min-width: 1920px) {
+  .figma-tv-mode .figma-main-content {
+    margin-left: calc(5vw + 2vw + 2vw); /* sidebar width + left margin + spacing */
+    margin-right: 2vw;
+    width: auto;
+    max-width: none;
+    padding: 4vh 3vw 2vh 3vw;
+    gap: 1.5vh;
+  }
 }
 
 /* HEADER */
@@ -1956,6 +2007,15 @@ html, body {
   justify-content: space-between;
   height: 68px;
   margin-bottom: 0;
+}
+
+/* TV MODE - Scale header (1920px+ only) */
+@media (min-width: 1920px) {
+  .figma-tv-mode .figma-header {
+    height: auto;
+    min-height: 6vh;
+    padding: 1vh 0;
+  }
 }
 
 .history-page .figma-header {
@@ -2053,6 +2113,14 @@ html, body {
   margin-bottom: 16px;
 }
 
+/* TV MODE - Responsive grid for 4K (1920px+ only) */
+@media (min-width: 1920px) {
+  .figma-tv-mode .figma-metrics-plant-container {
+    gap: 2vw;
+    margin-bottom: 1.5vh;
+  }
+}
+
 .figma-status-icon {
   width: 56px;
   height: 56px;
@@ -2120,6 +2188,34 @@ html, body {
   transition: all 0.2s ease;
 }
 
+/* TV MODE - Viewport-based metric tiles for 4K (1920px+ only) */
+@media (min-width: 1920px) {
+  .figma-tv-mode .figma-metric-tile {
+    width: 12vw;
+    min-width: 180px;
+    height: auto;
+    min-height: 12vh;
+    padding: 1.5vw;
+    gap: 0.8vh;
+  }
+
+  .figma-tv-mode .figma-metric-icon-circle {
+    width: 3.5vw;
+    height: 3.5vw;
+    min-width: 50px;
+    min-height: 50px;
+  }
+
+  .figma-tv-mode .figma-metric-icon {
+    font-size: 2vw;
+  }
+
+  .figma-tv-mode .figma-plant-area {
+    height: 50vh;
+    min-height: 500px;
+  }
+}
+
 .figma-metric-tile:hover {
   transform: translateY(-2px);
   box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.2);
@@ -2146,8 +2242,8 @@ html, body {
 }
 
 .figma-metric-tile.green-tile {
-  background: hsl(142, 65%, 45%); /* Muted green - was #22c55e */
-  box-shadow: 0px 4px 12px 0px rgba(34, 197, 94, 0.15);
+  background: #0da271;
+  box-shadow: 0px 4px 12px 0px rgba(13, 162, 113, 0.15);
 }
 
 .figma-metric-icon-circle {
@@ -2179,6 +2275,75 @@ html, body {
   color: white;
   opacity: 0.95;
   margin: 0;
+}
+
+/* BUBBLE ANIMATIONS - Cute bubbles for moisture tile when data is present */
+.bubble-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.bubble {
+  position: absolute;
+  bottom: -20px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: float-up 3s ease-in infinite;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bubble-1 {
+  width: 12px;
+  height: 12px;
+  left: 25%;
+  animation-delay: 0s;
+  animation-duration: 3.5s;
+}
+
+.bubble-2 {
+  width: 8px;
+  height: 8px;
+  left: 55%;
+  animation-delay: 1.2s;
+  animation-duration: 3s;
+}
+
+.bubble-3 {
+  width: 10px;
+  height: 10px;
+  left: 75%;
+  animation-delay: 2s;
+  animation-duration: 4s;
+}
+
+@keyframes float-up {
+  0% {
+    bottom: -20px;
+    opacity: 0;
+    transform: translateX(0) scale(1);
+  }
+  10% {
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(10px) scale(1.1);
+  }
+  100% {
+    bottom: 100%;
+    opacity: 0;
+    transform: translateX(-10px) scale(0.8);
+  }
+}
+
+.figma-metric-tile {
+  position: relative;
+  overflow: hidden;
 }
 
 /* BOTTOM CONTAINER */
@@ -2215,17 +2380,27 @@ html, body {
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
 }
 
-/* TV MODE - Better chart sizing for larger screens */
-.figma-tv-mode .figma-action-tiles {
-  grid-template-columns: 1fr 2fr 1fr;
-}
+/* TV MODE - Responsive action tiles for 4K (1920px+ only) */
+@media (min-width: 1920px) {
+  .figma-tv-mode .figma-action-tiles {
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 2vw;
+  }
 
-.figma-tv-mode .figma-tv-chart {
-  min-width: 600px;
-}
+  .figma-tv-mode .figma-action-tile {
+    height: 25vh;
+    min-height: 250px;
+    padding: 1.5vw;
+  }
 
-.figma-tv-mode .figma-chart-container {
-  height: 280px;
+  .figma-tv-mode .figma-tv-chart {
+    min-width: auto;
+  }
+
+  .figma-tv-mode .figma-chart-container {
+    height: 20vh;
+    min-height: 200px;
+  }
 }
 
 .figma-tv-mode .figma-metric-tile:focus,
@@ -2419,6 +2594,17 @@ html, body {
   transition: opacity 0.3s ease;
 }
 
+/* TV MODE - Larger logo for 4K */
+.figma-tv-mode .figma-logo-container {
+  margin-top: 2vh;
+  padding: 1vh 0;
+}
+
+.figma-tv-mode .figma-logo {
+  max-width: 15vw;
+  min-width: 200px;
+}
+
 .figma-logo:hover {
   opacity: 0.8;
 }
@@ -2471,7 +2657,10 @@ html, body {
 }
 
 .figma-mobile-header {
-  padding: 1.5rem 1rem 1rem 1rem;
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
   background: rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
@@ -2630,6 +2819,8 @@ html, body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .figma-mobile-metric-tile:active {
@@ -2683,8 +2874,8 @@ html, body {
 }
 
 .figma-mobile-metric-tile.green-tile {
-  background: linear-gradient(135deg, hsl(142, 65%, 48%) 0%, hsl(142, 65%, 45%) 100%);
-  box-shadow: 0px 4px 16px 0px rgba(34, 197, 94, 0.4);
+  background: linear-gradient(135deg, #0da271 0%, #0b8c60 100%);
+  box-shadow: 0px 4px 16px 0px rgba(13, 162, 113, 0.4);
 }
 
 .figma-mobile-chart-card {
@@ -2839,16 +3030,14 @@ html, body {
 /* MENU TAB - White glowing button on left edge */
 .figma-mobile-menu-tab {
   position: fixed;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 1rem;
+  top: calc(3.5rem + env(safe-area-inset-top, 0px));
   width: 48px;
-  height: 80px;
+  height: 48px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-left: none;
-  border-radius: 0 12px 12px 0;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2878,7 +3067,7 @@ html, body {
 }
 
 .figma-mobile-menu-tab:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 
 .figma-menu-tab-icon {
@@ -3589,6 +3778,24 @@ html, body {
   transition: all 0.2s ease;
 }
 
+/* TV MODE - Scale details cards (1920px+ only) */
+@media (min-width: 1920px) {
+  .tv-mode .details-card {
+    padding: 2vw;
+    border-radius: 1.2vw;
+    font-size: 1.2vw;
+  }
+
+  .tv-mode .details-card-title {
+    font-size: 1.5vw;
+  }
+
+  .tv-mode .details-label,
+  .tv-mode .details-value {
+    font-size: 1.2vw;
+  }
+}
+
 .details-card:hover {
   border-color: #4b5563;
 }
@@ -3714,6 +3921,30 @@ html, body {
   width: 100%;
   max-width: 1200px;
   margin: 0;
+}
+
+/* TV MODE - Scale history chart for 4K (1920px+ only) */
+@media (min-width: 1920px) {
+  .tv-mode .history-chart-card {
+    padding: 2vw;
+    border-radius: 1.2vw;
+    max-width: none;
+  }
+
+  .tv-mode .history-chart-wrapper {
+    height: 40vh;
+    min-height: 300px;
+  }
+
+  .tv-mode .history-range-selector {
+    gap: 2vw;
+    margin-bottom: 2vh;
+    padding-bottom: 1vh;
+  }
+
+  .tv-mode .history-range-label {
+    font-size: 1.2vw;
+  }
 }
 
 .history-range-selector {
@@ -3848,10 +4079,100 @@ html, body {
   position: relative;
 }
 
+.ai-responses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 1rem;
+}
+
+.ai-responses-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.ai-responses-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(124, 58, 237, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.ai-camera-led {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ai-camera-led.active {
+  background: radial-gradient(circle at 30% 30%, #4ade80, #22c55e);
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(34, 197, 94, 0.6),
+    0 0 12px rgba(34, 197, 94, 0.4);
+}
+
+.ai-camera-led.inactive {
+  background: radial-gradient(circle at 30% 30%, #4b5563, #374151);
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.ai-camera-led.inactive:hover {
+  background: radial-gradient(circle at 30% 30%, #6b7280, #4b5563);
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 0 6px rgba(255, 255, 255, 0.2);
+}
+
+.ai-snapshot-button {
+  background: rgba(124, 58, 237, 0.3);
+  border: 1px solid rgba(124, 58, 237, 0.5);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.ai-snapshot-button:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.5);
+  border-color: rgba(124, 58, 237, 0.7);
+  transform: translateY(-1px);
+}
+
+.ai-snapshot-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ai-snapshot-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .ai-responses-close {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
   background: rgba(255, 255, 255, 0.1);
   border: none;
   border-radius: 50%;
@@ -3865,7 +4186,7 @@ html, body {
   font-size: 1.5rem;
   line-height: 1;
   transition: all 0.2s ease;
-  z-index: 10;
+  flex-shrink: 0;
 }
 
 .ai-responses-close:hover {
@@ -3875,33 +4196,6 @@ html, body {
 
 .ai-responses-close:active {
   transform: scale(0.9);
-}
-
-.ai-responses-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.ai-responses-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.ai-responses-count {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(124, 58, 237, 0.2);
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
 }
 
 /* Hidden video element for camera */

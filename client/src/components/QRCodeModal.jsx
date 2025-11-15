@@ -12,8 +12,12 @@ function QRCodeModal({ isOpen, onClose, url }) {
 
   useEffect(() => {
     if (isOpen && canvasRef.current && url) {
+      // Larger QR code for TV mode (10-foot viewing distance)
+      const isTVMode = document.querySelector('.figma-tv-mode');
+      const qrSize = isTVMode ? 512 : 256;
+      
       QRCode.toCanvas(canvasRef.current, url, {
-        width: 256,
+        width: qrSize,
         margin: 2,
         color: {
           dark: '#000000',

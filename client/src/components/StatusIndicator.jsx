@@ -7,9 +7,11 @@ import './StatusIndicator.css';
  * 
  * @param {string} status - Status key: 'great', 'fine', 'need_water', 'cold', 'hot', 'care', 'stale'
  * @param {object} statusConfig - Status configuration with emoji, text, and color
+ * @param {string} apiError - Optional API error message to display
+ * @param {number} lastUpdated - Optional timestamp of last update
  * @param {string} className - Optional additional CSS classes
  */
-function StatusIndicator({ status, statusConfig, className = '' }) {
+function StatusIndicator({ status, statusConfig, apiError, lastUpdated, className = '' }) {
   // Map status to Figma design colors
   const getStatusStyles = (statusKey) => {
     const statusMap = {
@@ -27,19 +29,58 @@ function StatusIndicator({ status, statusConfig, className = '' }) {
 
   const styles = getStatusStyles(status);
 
+  // Format last updated time
+  const formatLastUpdated = (timestamp) => {
+    if (!timestamp) return null;
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
   return (
     <div 
       className={`status-indicator ${className}`}
-      style={{ backgroundColor: styles.background }}
+      style={{ backgroundColor: apiError ? '#ef4444' : styles.background }}
     >
-      {statusConfig?.emoji && (
-        <span className="status-indicator__emoji">
-          {statusConfig.emoji}
-        </span>
+      {apiError ? (
+        <>
+          <span className="status-indicator__emoji">⚠️</span>
+          <div className="status-indicator__content">
+            <span className="status-indicator__text" style={{ color: styles.textColor }}>
+              Trouble talking to API. Last error received:
+            </span>
+            <span className="status-indicator__error" style={{ color: styles.textColor }}>
+              {apiError}
+            </span>
+            {lastUpdated && (
+              <span className="status-indicator__timestamp" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Last updated: {formatLastUpdated(lastUpdated)}
+              </span>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {statusConfig?.emoji && (
+            <span className="status-indicator__emoji">
+              {statusConfig.emoji}
+            </span>
+          )}
+          <div className="status-indicator__content">
+            <span className="status-indicator__text" style={{ color: styles.textColor }}>
+              {statusConfig?.text || 'Status unknown'}
+            </span>
+            {lastUpdated && (
+              <span className="status-indicator__timestamp" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Last updated: {formatLastUpdated(lastUpdated)}
+              </span>
+            )}
+          </div>
+        </>
       )}
-      <span className="status-indicator__text" style={{ color: styles.textColor }}>
-        {statusConfig?.text || 'Status unknown'}
-      </span>
     </div>
   );
 }

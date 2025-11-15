@@ -5,7 +5,6 @@ import MobileMenu from '../../components/MobileMenu';
 import logo from '../../icons/uto-labs-logo4x.png';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import StatusIndicator from '../../components/StatusIndicator';
-import QRCodeModal from '../../components/QRCodeModal';
 import AIResponsesFeed from '../../components/AIResponsesFeed';
 import { useAIAssistant } from '../../hooks/useAIAssistant';
 
@@ -13,11 +12,9 @@ import { useAIAssistant } from '../../hooks/useAIAssistant';
  * MOBILE LAYOUT - Single column stacked design with slide-out menu
  * Adapted from Figma design for mobile viewport
  */
-function HomeMobile({ plant, status, lastReading, loading, statusConfig }) {
+function HomeMobile({ plant, status, lastReading, chartData, loading, statusConfig }) {
   const plantData = { plant, status, lastReading };
-  const { aiStatus, hasCamera, responses, showQR, videoRef, startAI, stopAI, toggleQR, clearResponses } = useAIAssistant(plantData, 'mobile');
-  
-  const qrUrl = `${window.location.origin}/ai-assistant?plant=pot-01`;
+  const { aiStatus, hasCamera, responses, apiError, videoRef, startAI, stopAI, clearResponses, takeSnapshot } = useAIAssistant(plantData, 'mobile');
 
   const handleAIClick = () => {
     if (aiStatus === 'idle') {
@@ -120,7 +117,7 @@ function HomeMobile({ plant, status, lastReading, loading, statusConfig }) {
           <div className="figma-mobile-plant-container">
             <PlantVisualization 
               species={plant?.species_key || 'monstera'} 
-              health={(lastReading?.moisture_level || 50) / 100}
+              health={(lastReading?.soil_raw || 512) / 1023}
               height={280}
             />
           </div>
@@ -136,12 +133,19 @@ function HomeMobile({ plant, status, lastReading, loading, statusConfig }) {
             </p>
           </div>
 
-          <div className="figma-mobile-metric-tile blue-tile">
+          <div className={`figma-mobile-metric-tile blue-tile ${lastReading?.soil_raw ? 'has-data' : ''}`}>
             <div className="figma-mobile-metric-icon">💧</div>
             <p className="figma-mobile-metric-label">Moisture</p>
             <p className="figma-mobile-metric-value">
-              {lastReading?.moisture_level?.toFixed(0) || '32'}%
+              {lastReading?.soil_raw ? `${Math.round((lastReading.soil_raw / 1023) * 100)}%` : 'Not Connected'}
             </p>
+            {lastReading?.soil_raw && (
+              <div className="bubble-container">
+                <div className="bubble bubble-1"></div>
+                <div className="bubble bubble-2"></div>
+                <div className="bubble bubble-3"></div>
+              </div>
+            )}
           </div>
 
           <div className="figma-mobile-metric-tile orange-tile">
@@ -208,10 +212,7 @@ function HomeMobile({ plant, status, lastReading, loading, statusConfig }) {
       </div>
 
       {/* Hidden video element for camera */}
-      <video ref={videoRef} className="ai-video-hidden" playsInline />
-
-      {/* QR Code Modal */}
-      <QRCodeModal isOpen={showQR} onClose={toggleQR} url={qrUrl} />
+      <video ref={videoRef} className="ai-video-hidden" playsInline muted />
     </div>
   );
 }

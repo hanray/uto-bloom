@@ -129,3 +129,41 @@
 .qr-modal-button:active {
   background: #5b21b6;
 }
+
+/* TV MODE - Larger QR modal for 4K viewing distance */
+.figma-tv-mode .qr-modal-content {
+  max-width: 800px;
+  padding: 4rem;
+  border-radius: 32px;
+}
+
+.figma-tv-mode .qr-modal-logo {
+  width: 128px;
+}
+
+.figma-tv-mode .qr-modal-title {
+  font-size: 3rem;
+}
+
+.figma-tv-mode .qr-modal-subtitle {
+  font-size: 1.5rem;
+}
+
+.figma-tv-mode .qr-modal-canvas {
+  padding: 2rem;
+  border-radius: 24px;
+}
+
+.figma-tv-mode .qr-modal-instruction {
+  font-size: 1.25rem;
+  max-width: 600px;
+}
+
+.figma-tv-mode .qr-modal-url code {
+  font-size: 1.125rem;
+}
+
+.figma-tv-mode .qr-modal-button {
+  font-size: 1.5rem;
+  padding: 1.5rem;
+}

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Assistant Camera</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Camera View */
+    .camera-view {
+      flex: 1;
+      position: relative;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Overlay UI */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: env(safe-area-inset-top, 20px) 20px 20px 20px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .plant-info {
+      margin-left: auto;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* Bottom Controls */
+    .controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px 20px calc(env(safe-area-inset-bottom, 20px) + 20px) 20px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      pointer-events: all;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .capture-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #7c3aed;
+      border: 4px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+    }
+
+    .capture-btn:active {
+      transform: scale(0.95);
+      background: #6d28d9;
+    }
+
+    .capture-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .secondary-btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+    }
+
+    .secondary-btn:active {
+      transform: scale(0.98);
+      background: rgba(255,255,255,0.2);
+    }
+
+    .manual-mode {
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Loading Overlay */
+    .loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 10;
+    }
+
+    .loading.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #7c3aed;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 16px;
+      color: #fff;
+    }
+
+    /* Result Toast */
+    .toast {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      padding: 16px 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      font-size: 14px;
+      color: #fff;
+      display: none;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      max-width: 90%;
+    }
+
+    .toast.show {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { 
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .toast.success {
+      border-color: #22c55e;
+    }
+
+    .toast.error {
+      border-color: #ef4444;
+    }
+
+    /* Permissions Screen */
+    .permissions-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 40px;
+      text-align: center;
+      gap: 24px;
+    }
+
+    .permissions-screen.active {
+      display: flex;
+    }
+
+    .permissions-icon {
+      font-size: 64px;
+    }
+
+    .permissions-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .permissions-text {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      max-width: 400px;
+      line-height: 1.5;
+    }
+
+    .permission-btn {
+      padding: 16px 32px;
+      border-radius: 12px;
+      background: #7c3aed;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .permission-btn:active {
+      transform: scale(0.98);
+      background: #6d28d9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Permissions Request Screen -->
+    <div class="permissions-screen active" id="permissionsScreen">
+      <div class="permissions-icon">📸</div>
+      <h1 class="permissions-title">Camera Access Required</h1>
+      <p class="permissions-text">
+        UtoBloom AI Assistant needs access to your camera to analyze your plant's health.
+        Your photos are processed locally and never stored.
+      </p>
+      <button class="permission-btn" onclick="requestCamera()">Enable Camera</button>
+    </div>
+
+    <!-- Camera View -->
+    <div class="camera-view" id="cameraView" style="display: none;">
+      <video id="video" autoplay playsinline></video>
+      
+      <div class="overlay">
+        <!-- Top Status Bar -->
+        <div class="top-bar">
+          <div class="status-indicator"></div>
+          <span class="status-text" id="statusText">Camera Ready</span>
+          <span class="plant-info" id="plantInfo"></span>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="controls">
+          <div class="manual-mode" id="manualText">
+            Manual mode: Press capture to analyze
+          </div>
+          <div class="button-row">
+            <button class="secondary-btn" onclick="switchCamera()">🔄 Flip</button>
+            <button class="capture-btn" onclick="captureAndAnalyze()" id="captureBtn">
+              📸
+            </button>
+            <button class="secondary-btn" onclick="toggleAutoMode()" id="autoBtn">
+              Auto
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">Analyzing plant...</div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast" id="toast"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Parse URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const plantId = urlParams.get('plant_id') || 'pot-01';
+    const species = urlParams.get('species') || 'monstera';
+
+    // Update plant info
+    document.getElementById('plantInfo').textContent = `${species} • ${plantId}`;
+
+    // State
+    let stream = null;
+    let currentFacingMode = 'environment'; // Start with back camera
+    let autoMode = false;
+    let isAnalyzing = false;
+
+    // Request camera access
+    async function requestCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: currentFacingMode,
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        });
+
+        document.getElementById('video').srcObject = stream;
+        document.getElementById('permissionsScreen').classList.remove('active');
+        document.getElementById('cameraView').style.display = 'block';
+
+        showToast('Camera connected', 'success');
+      } catch (err) {
+        console.error('Camera access denied:', err);
+        showToast('Camera access denied. Please enable camera permissions.', 'error');
+      }
+    }
+
+    // Switch between front/back camera
+    async function switchCamera() {
+      if (!stream) return;
+
+      // Stop current stream
+      stream.getTracks().forEach(track => track.stop());
+
+      // Toggle facing mode
+      currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+
+      // Request new stream
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: currentFacingMode,
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        });
+
+        document.getElementById('video').srcObject = stream;
+        showToast(`Switched to ${currentFacingMode === 'environment' ? 'back' : 'front'} camera`, 'success');
+      } catch (err) {
+        console.error('Failed to switch camera:', err);
+        showToast('Failed to switch camera', 'error');
+      }
+    }
+
+    // Toggle auto/manual mode
+    function toggleAutoMode() {
+      autoMode = !autoMode;
+      const btn = document.getElementById('autoBtn');
+      const text = document.getElementById('manualText');
+
+      if (autoMode) {
+        btn.textContent = '⏸️ Stop';
+        btn.style.background = '#ef4444';
+        text.textContent = 'Auto mode: Analyzing every 30 seconds';
+        startAutoMode();
+      } else {
+        btn.textContent = 'Auto';
+        btn.style.background = 'rgba(255,255,255,0.1)';
+        text.textContent = 'Manual mode: Press capture to analyze';
+        stopAutoMode();
+      }
+    }
+
+    let autoInterval = null;
+
+    function startAutoMode() {
+      // Immediate first capture
+      captureAndAnalyze();
+
+      // Then every 30 seconds
+      autoInterval = setInterval(() => {
+        if (!isAnalyzing) {
+          captureAndAnalyze();
+        }
+      }, 30000);
+    }
+
+    function stopAutoMode() {
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+      }
+    }
+
+    // Capture frames and send to API
+    async function captureAndAnalyze() {
+      if (isAnalyzing) return;
+
+      isAnalyzing = true;
+      document.getElementById('captureBtn').disabled = true;
+      document.getElementById('loading').classList.add('active');
+      document.getElementById('statusText').textContent = 'Capturing...';
+
+      try {
+        const frames = await capture3Frames();
+        
+        document.getElementById('statusText').textContent = 'Analyzing...';
+
+        const response = await fetch('/api/analyze/plant', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer sk_dev_utobloom_2025'
+          },
+          body: JSON.stringify({
+            frames,
+            question: 'Does my plant look healthy and well today?',
+            context: {
+              plant_id: plantId,
+              species: species
+            },
+            options: {
+              include_care_recommendations: true,
+              analysis_type: 'visual_inspection'
+            }
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const health = result.health_assessment.overall_health;
+          const healthEmoji = health === 'healthy' ? '✅' : health === 'needs_attention' ? '⚠️' : '❌';
+          showToast(`${healthEmoji} Analysis complete: ${health}`, 'success');
+          document.getElementById('statusText').textContent = `${healthEmoji} ${health}`;
+        } else {
+          throw new Error(result.error || 'Analysis failed');
+        }
+
+      } catch (err) {
+        console.error('Analysis failed:', err);
+        showToast('Analysis failed: ' + err.message, 'error');
+        document.getElementById('statusText').textContent = 'Analysis failed';
+      } finally {
+        isAnalyzing = false;
+        document.getElementById('captureBtn').disabled = false;
+        document.getElementById('loading').classList.remove('active');
+      }
+    }
+
+    // Capture 3 frames with 200ms delay
+    async function capture3Frames() {
+      const video = document.getElementById('video');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = 400; // Smaller for faster upload
+      canvas.height = (video.videoHeight / video.videoWidth) * 400;
+
+      const frames = [];
+
+      for (let i = 0; i < 3; i++) {
+        if (i > 0) await delay(200);
+        
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+        frames.push(dataUrl);
+      }
+
+      return frames;
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast show ${type}`;
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      stopAutoMode();
+    });
+  </script>
+</body>
+</html>
