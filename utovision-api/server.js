@@ -165,6 +165,9 @@ async function analyzeWithOllama(frames, question, context, options, res, startT
     console.log(`📤 Sending to Ollama: ${OLLAMA_MODEL}`);
     console.log(`   Prompt: ${prompt.substring(0, 100)}...`);
     console.log(`   Images: ${cleanedFrames.length} frames`);
+    console.log(`   ⏳ Processing... (this may take 10-60 seconds)`);
+    
+    const analyzeStart = Date.now();
     
     // Call Ollama API
     const response = await ollama.generate({
@@ -175,6 +178,8 @@ async function analyzeWithOllama(frames, question, context, options, res, startT
     });
     
     console.log('✅ Ollama response received');
+    const analyzeTime = Date.now() - analyzeStart;
+    console.log(`   ⏱️  Analysis took ${analyzeTime}ms (${(analyzeTime/1000).toFixed(1)}s)`);
     console.log(`   Raw response length: ${response.response.length} chars`);
     
     // Parse Ollama's text response into structured format
@@ -188,12 +193,40 @@ async function analyzeWithOllama(frames, question, context, options, res, startT
     res.json(analysis);
     
   } catch (error) {
-    console.error('❌ Ollama analysis failed:', error);
+    console.error('❌ Ollama analysis failed - DETAILED ERROR:');
+    console.error('Error Name:', error.name);
+    console.error('Error Message:', error.message);
+    console.error('Error Code:', error.code);
+    console.error('Error Status:', error.status_code);
+    console.error('Full Error Object:', JSON.stringify(error, null, 2));
+    
+    if (error.stack) {
+      console.error('Stack Trace:', error.stack);
+    }
+    
+    // Try to get more details from the error
+    const errorDetails = {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      status_code: error.status_code,
+      error: error.error,
+      cause: error.cause,
+      full_error: error
+    };
+    
+    console.error('Structured Error Details:', JSON.stringify(errorDetails, null, 2));
+    
     res.status(500).json({
       error: {
         code: 'AI_ANALYSIS_FAILED',
         message: 'Failed to analyze plant with AI',
-        details: error.message
+        details: error.message,
+        error_name: error.name,
+        error_code: error.code,
+        status_code: error.status_code,
+        ollama_error: error.error,
+        full_details: errorDetails
       }
     });
   }

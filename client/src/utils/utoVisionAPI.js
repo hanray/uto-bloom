@@ -71,23 +71,23 @@ class UtoVisionAPI {
   captureFrame(videoElement) {
     const canvas = document.createElement('canvas');
     // Smaller size to reduce payload - visual inspection doesn't need high res
-    const maxWidth = 400;
+    const maxWidth = 300;
     const scale = Math.min(1, maxWidth / videoElement.videoWidth);
     canvas.width = videoElement.videoWidth * scale;
     canvas.height = videoElement.videoHeight * scale;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
     // Use lower quality for much smaller file size
-    return canvas.toDataURL('image/jpeg', 0.5).split(',')[1]; // Return base64 without prefix
+    return canvas.toDataURL('image/jpeg', 0.3).split(',')[1]; // Return base64 without prefix
   }
 
   /**
-   * Capture 3 frames from video for multi-angle analysis
+   * Capture 2 frames from video for multi-angle analysis
    * Captures with 200ms delay between frames
    */
   async capture3Frames(videoElement) {
     const frames = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       if (i > 0) {
         // Small delay between captures to get slightly different angles/lighting
         await new Promise(resolve => setTimeout(resolve, 200));

@@ -151,3 +151,36 @@
     font-size: 0.8125rem;
   }
 }
+
+/* AI Progress Indicator - NEW */
+.ai-progress-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(124, 58, 237, 0.95);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+  z-index: 1000;
+  animation: pulse-glow 2s ease-in-out infinite;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.6);
+  }
+}
+
+.ai-snapshot-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

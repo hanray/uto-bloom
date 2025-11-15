@@ -18,7 +18,7 @@ import logo from '../../icons/uto-labs-logo4x.png';
  */
 function HomeDesktop({ plant, status, lastReading, chartData, loading, statusConfig }) {
   const plantData = { plant, status, lastReading };
-  const { aiStatus, hasCamera, responses, apiError, videoRef, startAI, stopAI, clearResponses, takeSnapshot } = useAIAssistant(plantData, 'desktop');
+  const { aiStatus, hasCamera, responses, apiError, isAnalyzing, analysisProgress, videoRef, startAI, stopAI, clearResponses, takeSnapshot } = useAIAssistant(plantData, 'desktop');
 
   const handleAIClick = () => {
     // Don't allow interaction while initializing
@@ -216,13 +216,18 @@ function HomeDesktop({ plant, status, lastReading, chartData, loading, statusCon
                 style={{ cursor: aiStatus !== 'active' ? 'pointer' : 'default' }}
               />
               <button 
-                className="ai-snapshot-button" 
+                className="ai-snapshot-btn"
                 onClick={takeSnapshot}
-                disabled={aiStatus !== 'active'}
+                disabled={aiStatus !== 'active' || isAnalyzing}
                 title="Take snapshot and analyze"
               >
-                📸 Analyze Now
+                {isAnalyzing ? '⏳ Analyzing...' : '📸 Analyze Now'}
               </button>
+              {analysisProgress && (
+                <div className="ai-progress-indicator">
+                  {analysisProgress}
+                </div>
+              )}
               <span className="ai-responses-count">{responses.length}/10</span>
               <button className="ai-responses-close" onClick={clearResponses}>×</button>
             </div>

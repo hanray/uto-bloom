@@ -12,6 +12,8 @@ export function useAIAssistant(plantData, platform = 'desktop') {
   const [responses, setResponses] = useState([]);
   const [showQR, setShowQR] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // NEW: Track when AI is processing
+  const [analysisProgress, setAnalysisProgress] = useState(''); // NEW: Show what step AI is on
   const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
   const autoCloseTimer = useRef(null);
@@ -212,6 +214,7 @@ export function useAIAssistant(plantData, platform = 'desktop') {
 
     console.log('📸 Taking manual snapshot...');
     setApiError(null); // Clear any previous errors
+    setIsAnalyzing(true); // NEW: Start loading state
 
     try {
       const plantContext = {
@@ -222,6 +225,7 @@ export function useAIAssistant(plantData, platform = 'desktop') {
         healthStatus: plantData?.status
       };
 
+      setAnalysisProgress('📸 Capturing frames...'); // NEW
       addResponse({
         type: 'info',
         message: '📸 Capturing snapshot and analyzing...',
@@ -232,13 +236,19 @@ export function useAIAssistant(plantData, platform = 'desktop') {
       const frames = await utoVisionAPI.capture3Frames(videoRef.current);
       console.log(`✅ Captured ${frames.length} frames`);
 
+      setAnalysisProgress('🧠 AI analyzing plant health... (30-60s)'); // NEW
       // Send to API
       const result = await utoVisionAPI.analyzeHealth(frames, plantContext);
 
+      setAnalysisProgress('✅ Analysis complete!'); // NEW
       handleAnalysisResult(result);
     } catch (error) {
       console.error('❌ Snapshot failed:', error);
+      setAnalysisProgress(''); // NEW: Clear on error
       handleAnalysisError(error);
+    } finally {
+      setIsAnalyzing(false); // NEW: End loading state
+      setTimeout(() => setAnalysisProgress(''), 2000); // NEW: Clear success message after 2s
     }
   }, [aiStatus, plantData, addResponse, handleAnalysisResult, handleAnalysisError]);
 
@@ -252,6 +262,8 @@ export function useAIAssistant(plantData, platform = 'desktop') {
     responses,
     showQR,
     apiError,
+    isAnalyzing, // NEW: Loading state for AI processing
+    analysisProgress, // NEW: Progress message
     videoRef,
     startAI,
     stopAI,
