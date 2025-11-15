@@ -23,6 +23,12 @@ class UtoVisionAPI {
    */
   async hasCamera() {
     try {
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('❌ Camera API not supported in this browser/WebView');
+        return false;
+      }
+      
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices.some(device => device.kind === 'videoinput');
     } catch (error) {
@@ -36,6 +42,13 @@ class UtoVisionAPI {
    * Mobile-friendly: tries back camera first, falls back to any camera
    */
   async requestCameraAccess() {
+    // Check if camera API exists
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      const error = new Error('Camera API not supported. Please use Chrome browser or enable WebView camera permissions.');
+      error.name = 'NotSupportedError';
+      throw error;
+    }
+
     try {
       // Try back camera first (better for plant photos on mobile)
       console.log('📱 Requesting back camera...');
@@ -61,7 +74,17 @@ class UtoVisionAPI {
         return this.stream;
       } catch (fallbackError) {
         console.error('❌ Camera access denied:', fallbackError);
-        throw new Error('Camera access denied. Please check browser permissions.');
+        
+        // Better error messages
+        if (fallbackError.name === 'NotAllowedError') {
+          throw new Error('Camera permission denied. Please allow camera access in browser settings.');
+        } else if (fallbackError.name === 'NotFoundError') {
+          throw new Error('No camera found on this device.');
+        } else if (fallbackError.name === 'NotReadableError') {
+          throw new Error('Camera is already in use by another app.');
+        } else {
+          throw new Error(`Camera error: ${fallbackError.message}`);
+        }
       }
     }
   }

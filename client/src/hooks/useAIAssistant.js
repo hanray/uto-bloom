@@ -152,18 +152,31 @@ export function useAIAssistant(plantData, platform = 'desktop') {
         console.warn('Failed to report error to server:', reportError);
       }
       
+      // Log detailed diagnostics to console
+      console.log('📊 Camera API Diagnostics:');
+      console.log('  - navigator.mediaDevices:', !!navigator.mediaDevices);
+      console.log('  - getUserMedia:', !!navigator.mediaDevices?.getUserMedia);
+      console.log('  - Error name:', error.name);
+      console.log('  - Error message:', error.message);
+      console.log('  - User agent:', navigator.userAgent);
+      console.log('  - Platform:', platform);
+      console.log('  - Protocol:', window.location.protocol);
+      console.log('  - Host:', window.location.host);
+      
       setAiStatus('error');
       
       // More helpful error message
-      let errorMsg = 'Failed to access camera. ';
-      if (error.message.includes('Permission denied') || error.name === 'NotAllowedError') {
-        errorMsg += 'Please allow camera access in your browser settings.';
+      let errorMsg = '';
+      if (error.name === 'NotSupportedError') {
+        errorMsg = 'Camera API not available. Try opening in Chrome browser (not the installed PWA).';
+      } else if (error.message.includes('Permission denied') || error.name === 'NotAllowedError') {
+        errorMsg = 'Camera permission denied. Please allow camera access in browser settings.';
       } else if (error.name === 'NotFoundError') {
-        errorMsg += 'No camera detected on this device.';
+        errorMsg = 'No camera detected. Make sure your device has a camera.';
       } else if (error.name === 'NotReadableError') {
-        errorMsg += 'Camera is already in use by another app.';
+        errorMsg = 'Camera in use by another app. Close other camera apps and try again.';
       } else {
-        errorMsg += error.message || 'Unknown error.';
+        errorMsg = `Camera error: ${error.message}`;
       }
       
       setApiError(errorMsg);
