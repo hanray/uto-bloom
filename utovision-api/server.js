@@ -153,6 +153,58 @@ app.post('/api/analyze/plant', validateApiKey, (req, res) => {
  */
 
 /**
+ * Check if sensor data indicates critical condition requiring detailed analysis
+ */
+function hasCriticalSensorData(context) {
+  const sensorData = context.sensor_data;
+  if (!sensorData) return false;
+
+  // Soil moisture critical ranges (0-1023 scale)
+  const soilRaw = sensorData.soil_moisture_raw;
+  if (soilRaw !== undefined && soilRaw !== null) {
+    // Critical dry: < 200
+    // Critical wet: > 900
+    if (soilRaw < 200 || soilRaw > 900) {
+      console.log(`⚠️ Critical soil moisture detected: ${soilRaw}`);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Check if AI response indicates problems requiring detailed analysis
+ */
+function hasProblemsInResponse(responseText) {
+  const problemKeywords = [
+    'yellow',
+    'brown',
+    'wilt',
+    'spot',
+    'dying',
+    'concern',
+    'issue',
+    'problem',
+    'unhealthy',
+    'stress',
+    'disease',
+    'pest',
+    'damage'
+  ];
+
+  const responseLower = responseText.toLowerCase();
+  const detected = problemKeywords.filter(keyword => responseLower.includes(keyword));
+  
+  if (detected.length > 0) {
+    console.log(`⚠️ Problems detected in 8b response: ${detected.join(', ')}`);
+    return true;
+  }
+  
+  return false;
+}
+
+/**
  * Smart model selection based on query complexity
  * Simple queries use fast model, complex analysis uses powerful model
  */
@@ -212,14 +264,16 @@ function selectModel(question, context) {
 }
 
 /**
- * Analyze plant health using Ollama vision model
+ * Analyze plant health using Ollama vision model with two-stage smart detection
+ * Stage 1: Quick 8b scan (2-3s)
+ * Stage 2: Detailed 32b analysis if problems detected (auto-escalate)
  */
 async function analyzeWithOllama(frames, question, context, options, res, startTime) {
   try {
-    console.log('🤖 Starting Ollama analysis...');
+    console.log('🤖 Starting two-stage smart analysis...');
     
-    // Smart model selection
-    const selectedModel = selectModel(question, context);
+    // Check if sensor data already indicates critical condition
+    const criticalSensors = hasCriticalSensorData(context);
     
     // Build the prompt with plant context
     const prompt = buildPlantAnalysisPrompt(question, context);
@@ -229,35 +283,96 @@ async function analyzeWithOllama(frames, question, context, options, res, startT
       frame.replace(/^data:image\/\w+;base64,/, '')
     );
     
-    console.log(`📤 Sending to Ollama: ${selectedModel}`);
-    console.log(`   Prompt: ${prompt.substring(0, 100)}...`);
-    console.log(`   Images: ${cleanedFrames.length} frames`);
-    console.log(`   ⏳ Processing... (this may take 10-60 seconds)`);
+    // Stage 1: Quick scan with FAST model (unless sensors already critical)
+    let finalAnalysis;
+    let usedModel = FAST_MODEL;
     
-    const analyzeStart = Date.now();
+    if (criticalSensors && ENABLE_SMART_ROUTING) {
+      // Skip 8b, go straight to 32b due to critical sensors
+      console.log('🚨 CRITICAL SENSORS - Skipping 8b, using 32b directly');
+      usedModel = SMART_MODEL;
+      
+      console.log(`📤 Sending to Ollama: ${usedModel}`);
+      console.log(`   Prompt: ${prompt.substring(0, 100)}...`);
+      console.log(`   Images: ${cleanedFrames.length} frames`);
+      console.log(`   ⏳ Processing with powerful model... (60-100s)`);
+      
+      const analyzeStart = Date.now();
+      const response = await ollama.generate({
+        model: usedModel,
+        prompt: prompt,
+        images: cleanedFrames,
+        stream: false
+      });
+      
+      const analyzeTime = Date.now() - analyzeStart;
+      console.log(`✅ 32b analysis complete in ${(analyzeTime/1000).toFixed(1)}s`);
+      finalAnalysis = parseOllamaResponse(response.response, context);
+      
+    } else {
+      // Stage 1: Fast 8b scan
+      console.log('⚡ STAGE 1: Quick scan with 8b model...');
+      console.log(`📤 Sending to Ollama: ${FAST_MODEL}`);
+      console.log(`   Prompt: ${prompt.substring(0, 100)}...`);
+      console.log(`   Images: ${cleanedFrames.length} frames`);
+      console.log(`   ⏳ Quick processing... (2-3s)`);
+      
+      const stage1Start = Date.now();
+      const fastResponse = await ollama.generate({
+        model: FAST_MODEL,
+        prompt: prompt,
+        images: cleanedFrames,
+        stream: false
+      });
+      
+      const stage1Time = Date.now() - stage1Start;
+      console.log(`✅ 8b scan complete in ${(stage1Time/1000).toFixed(1)}s`);
+      console.log(`   Response preview: ${fastResponse.response.substring(0, 150)}...`);
+      
+      // Check if 8b detected problems
+      const hasProblems = hasProblemsInResponse(fastResponse.response);
+      
+      if (hasProblems && ENABLE_SMART_ROUTING) {
+        // Stage 2: Auto-escalate to 32b for detailed analysis
+        console.log('🔬 STAGE 2: Problems detected - escalating to 32b for detailed analysis...');
+        console.log(`📤 Re-analyzing with: ${SMART_MODEL}`);
+        console.log(`   ⏳ Detailed processing... (60-100s)`);
+        
+        const stage2Start = Date.now();
+        const smartResponse = await ollama.generate({
+          model: SMART_MODEL,
+          prompt: prompt,
+          images: cleanedFrames,
+          stream: false
+        });
+        
+        const stage2Time = Date.now() - stage2Start;
+        console.log(`✅ 32b detailed analysis complete in ${(stage2Time/1000).toFixed(1)}s`);
+        console.log(`   Total time: ${((stage1Time + stage2Time)/1000).toFixed(1)}s`);
+        
+        finalAnalysis = parseOllamaResponse(smartResponse.response, context);
+        finalAnalysis.analysis_note = `Auto-escalated to detailed analysis after quick scan detected potential issues`;
+        usedModel = SMART_MODEL;
+        
+      } else {
+        // No problems detected - use 8b results
+        console.log('✅ No issues detected - using fast 8b results');
+        finalAnalysis = parseOllamaResponse(fastResponse.response, context);
+        usedModel = FAST_MODEL;
+      }
+    }
     
-    // Call Ollama API with selected model
-    const response = await ollama.generate({
-      model: selectedModel,
-      prompt: prompt,
-      images: cleanedFrames,
-      stream: false
-    });
-    
-    console.log('✅ Ollama response received');
-    const analyzeTime = Date.now() - analyzeStart;
-    console.log(`   ⏱️  Analysis took ${analyzeTime}ms (${(analyzeTime/1000).toFixed(1)}s)`);
-    console.log(`   Raw response length: ${response.response.length} chars`);
-    
-    // Parse Ollama's text response into structured format
-    const analysis = parseOllamaResponse(response.response, context);
+    // Add metadata
+    finalAnalysis.model_used = usedModel;
+    finalAnalysis.analysis_time = Date.now() - startTime;
     
     const processingTime = Date.now() - startTime;
     console.log(`✅ AI analysis complete in ${processingTime}ms`);
-    console.log(`   Health: ${analysis.health_assessment.overall_health}`);
-    console.log(`   Confidence: ${(analysis.health_assessment.confidence * 100).toFixed(0)}%`);
+    console.log(`   Model: ${usedModel}`);
+    console.log(`   Health: ${finalAnalysis.health_assessment.overall_health}`);
+    console.log(`   Confidence: ${(finalAnalysis.health_assessment.confidence * 100).toFixed(0)}%`);
     
-    res.json(analysis);
+    res.json(finalAnalysis);
     
   } catch (error) {
     console.error('❌ Ollama analysis failed - DETAILED ERROR:');
