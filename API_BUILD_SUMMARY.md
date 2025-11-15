@@ -1,315 +1,260 @@
-# UtoVision API - Build Complete ✅
+# UtoVision AI API Integration - Questions for External API Team
 
-## What Was Built
+## Understanding the External AI API
 
-A **production-ready Express API server** that exposes your sophisticated scene analysis engine as RESTful endpoints and WebSocket streams. The API can be used by any application (UtoBloom, mobile apps, web apps, etc.) to perform AI-powered vision analysis.
-
----
-
-## 📁 Project Structure
-
-```
-UtoVision/
-├── api-server/                     ✅ NEW - Standalone API Server
-│   ├── server.js                   # Express server (running on :3000)
-│   ├── package.json                # Dependencies installed
-│   ├── .env                        # Configuration (copied from .env.example)
-│   ├── README.md                   # Documentation
-│   ├── TESTING.md                  # Test examples
-│   │
-│   ├── config/
-│   │   └── default.js              # Environment configuration
-│   │
-│   ├── middleware/
-│   │   ├── auth.js                 # Bearer token authentication
-│   │   ├── errorHandler.js         # Global error handling
-│   │   └── rateLimit.js            # Rate limiting + request queue
-│   │
-│   ├── routes/
-│   │   ├── analyze.js              # Core analysis endpoints
-│   │   └── status.js               # System management endpoints
-│   │
-│   ├── services/
-│   │   ├── ollamaService.js        # Ollama model management
-│   │   ├── sceneAnalysisService.js # Scene change detection
-│   │   └── historyManager.js       # Session tracking
-│   │
-│   ├── utils/
-│   │   ├── logger.js               # Winston logging
-│   │   └── validators.js           # Input validation
-│   │
-│   ├── websocket/
-│   │   └── streamHandler.js        # WebSocket streaming
-│   │
-│   └── logs/                       # Log files (auto-generated)
-│
-├── shared/                         ✅ NEW - Shared Code
-│   └── sceneAnalysis.js            # Your sophisticated algorithm
-│
-├── src/                            ✅ UPDATED - React App (Still Works!)
-│   ├── components/
-│   │   └── CameraView.jsx          # Updated import path
-│   └── ...                         # Everything else unchanged
-│
-└── [rest of React app unchanged]
-```
+We're building an **adapter service** (`utovision-api` on port 3001) that sits between UtoBloom client and your external AI API with Ollama integration. Before we can complete the integration, we need clarity on your API's specifications.
 
 ---
 
-## 🚀 API Endpoints Implemented
+## ❓ Critical Questions About Your API
 
-### **Core Analysis** (Requires Auth)
-- **POST** `/api/analyze` - Single image analysis
-- **POST** `/api/analyze/batch` - Batch processing (max 5 images)
-- **POST** `/api/analyze/plant` - Plant health with sensor fusion
-- **POST** `/api/analyze/detect-issues` - Pest & disease detection
+### 1. **API Location & Access**
+- [ ] What is the base URL of your AI API?
+  - Is it running locally? (e.g., `http://localhost:3000`)
+  - Is it on a remote server? (e.g., `https://api.utovision.com`)
+  - Different port on same machine?
 
-### **System Management**
-- **GET** `/api/status` - Ollama & model status (public)
-- **GET** `/health` - Health check (public)
-- **POST** `/api/models/switch` - Switch between qwen3-vl/llava
-- **GET** `/api/sessions/:id/history` - Analysis history
+### 2. **Authentication**
+- [ ] How do we authenticate requests to your API?
+  - Bearer token in Authorization header?
+  - API key in a custom header?
+  - What is the current API key we should use?
 
-### **Real-Time Streaming**
-- **WS** `/api/stream` - WebSocket for live camera feeds
-
----
-
-## 🔒 Security Features
-
-✅ **API Key Authentication** - Bearer token required  
-✅ **Rate Limiting** - 10 requests/60s globally  
-✅ **Request Queue** - Max 3 concurrent analyses  
-✅ **Input Validation** - Image size, format, context data  
-✅ **Helmet.js** - Security headers  
-✅ **CORS** - Cross-origin support  
-
----
-
-## 📊 Key Features
-
-### **Intelligent Caching**
-- SHA-256 image hashing
-- 24-hour TTL
-- Reduces redundant processing
-
-### **Model Fallback**
-- Primary: qwen3-vl:235b
-- Fallback: llava:latest
-- Automatic switching on failure
-
-### **Robust Error Handling**
-- Structured error responses
-- Detailed logging (Winston)
-- Graceful degradation
-
-### **Scene Analysis Integration**
-- Uses your existing 80% confidence algorithm
-- Variance adjustment
-- Staleness detection
-- Semantic similarity
-
----
-
-## ⚙️ Configuration
-
-**File:** `api-server/.env`
-
-```env
-PORT=3000
-OLLAMA_HOST=http://localhost:11434
-PRIMARY_MODEL=qwen3-vl:235b
-FALLBACK_MODEL=llava:latest
-API_KEY=sk_dev_your_secret_key_here    # ⚠️ CHANGE THIS!
-RATE_LIMIT_MAX_REQUESTS=10
-CONCURRENT_ANALYSIS_LIMIT=3
-```
-
----
-
-## 🎯 Usage Examples
-
-### **From UtoBloom (or any app)**
+### 3. **Request Format - Plant Health Analysis**
+According to docs, you expect this format. **Is this still accurate?**
 
 ```javascript
-const analyzeImage = async (image, plantData) => {
-  const response = await fetch('http://localhost:3000/api/analyze/plant', {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer YOUR_API_KEY',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      image: base64Image,
+POST /api/analyze/plant
+Headers:
+  Authorization: Bearer YOUR_API_KEY
+  Content-Type: application/json
+
+Body:
+{
+  "image": "base64-encoded-image",  // Single image or multiple?
+  "context": {
+    "plant_id": "pot-01",
+    "species": "monstera",
+    "current_moisture": 0.45,       // Do you need this?
+    "temperature_c": 22.5,          // Or just visual analysis?
+    "humidity_percent": 47,
+    "light_lux": 12000,
+    "last_watered": "2025-11-14T08:00:00Z",
+    "health_status": "great"
+  },
+  "options": {
+    "include_care_recommendations": true
+  }
+}
+```
+
+**Questions:**
+- [ ] Do you want `image` (singular) or `frames` (array of 3 images)?
+- [ ] Do you need sensor data (moisture, temp, light) or just the image?
+- [ ] Is the image format `base64` with or without the `data:image/jpeg;base64,` prefix?
+- [ ] What should we send in the `question` field? Or is there no question field?
+
+### 4. **Response Format**
+According to docs, you return this. **Is this correct?**
+
+```javascript
+{
+  "success": true,
+  "timestamp": "2025-11-15T...",
+  "health_assessment": {
+    "overall_health": "Great" | "Good" | "Fair" | "Needs Attention",
+    "confidence": 0.85,
+    "visual_symptoms": [
+      {
+        "symptom": "string",
+        "severity": "critical" | "high" | "moderate" | "mild",
+        "affected_area": "string",
+        "confidence": 0.85
+      }
+    ],
+    "diagnosis": {
+      "primary_issue": "string",
+      "contributing_factors": [],
+      "confidence": 0.82
+    }
+  },
+  "care_recommendations": [
+    {
+      "action": "string",
+      "priority": "critical" | "high" | "medium" | "low",
+      "details": "string",
+      "estimated_recovery_time": "string"
+    }
+  ],
+  "metadata": {
+    "model_used": "llava:latest",
+    "processing_time_ms": 1500,
+    "ai_powered": true
+  }
+}
+```
+
+**Questions:**
+- [ ] Is this the actual response structure from your API?
+- [ ] Any additional fields we need to handle?
+- [ ] How do you indicate errors? (e.g., Ollama offline)
+
+### 5. **Error Handling**
+- [ ] What HTTP status codes do you return for errors?
+  - 503 when Ollama is offline?
+  - 500 for internal errors?
+  - 400 for bad requests?
+- [ ] What is the error response format?
+  ```javascript
+  {
+    "error": {
+      "code": "string",
+      "message": "string",
+      "user_message": "string"  // Friendly message for UI?
+    }
+  }
+  ```
+
+### 6. **Other Endpoints**
+Do these endpoints exist on your API?
+
+- [ ] `POST /api/plant/ask` - Q&A without image?
+- [ ] `POST /api/analyze/detect-issues` - Issue detection?
+- [ ] `GET /api/status` - Health check / Ollama status?
+- [ ] `WebSocket /api/stream` - Streaming analysis?
+
+If yes, what are their request/response formats?
+
+### 7. **Rate Limits & Constraints**
+- [ ] Do you have rate limits we need to respect?
+- [ ] Maximum image size allowed?
+- [ ] Timeout duration for responses?
+- [ ] Concurrent request limits?
+
+### 8. **Models & Configuration**
+- [ ] Which Ollama model are you using? (`llava:latest`, `qwen3-vl:235b`, other?)
+- [ ] Can we specify the model in requests or is it fixed?
+- [ ] Are there different models for different operations?
+
+---
+
+## 🎯 What We're Building (Our Adapter)
+
+**UtoBloom Client → Our Adapter (port 3001) → Your AI API**
+
+### Our Current Adapter Sends:
+```javascript
+POST http://localhost:3001/api/analyze/plant
+{
+  "frames": ["base64-frame1", "base64-frame2", "base64-frame3"],
+  "question": "Does my plant look healthy and well today?",
+  "context": {
+    "plant_id": "pot-01",
+    "species": "monstera"
+  },
+  "options": {
+    "include_care_recommendations": true,
+    "analysis_type": "visual_inspection"
+  }
+}
+```
+
+### We Need to Transform This To:
+**→ Whatever format YOUR API expects**
+
+---
+
+## 📋 Action Items for Integration
+
+Once you answer the questions above, we will:
+
+1. ✅ Update our adapter to forward requests in YOUR expected format
+2. ✅ Transform your responses to match what UtoBloom client expects
+3. ✅ Handle errors gracefully (Ollama offline, timeouts, etc.)
+4. ✅ Add proper logging for debugging
+5. ✅ Test end-to-end flow
+
+---
+
+## 🔍 Testing Plan
+
+After integration, we'll test:
+- ✅ Camera captures 3 frames → adapter receives them
+- ✅ Adapter transforms & forwards to your API
+- ✅ Your API analyzes with Ollama → returns response
+- ✅ Adapter transforms response back to client format
+- ✅ UI displays AI analysis correctly
+- ✅ Error scenarios (Ollama offline, network issues, etc.)
+
+- ✅ Error scenarios (Ollama offline, network issues, etc.)
+
+---
+
+## 📝 Current Status
+
+**What's Working:**
+- ✅ UtoBloom client captures camera frames (3 snapshots @ 400px, 50% quality)
+- ✅ Client sends to our adapter at `http://localhost:3001/api/analyze/plant`
+- ✅ Adapter has mock responses for UI testing
+- ✅ Hot reload enabled (nodemon) for rapid development
+
+**What's Needed:**
+- ❌ Connection to your external AI API (waiting for specs above)
+- ❌ Request/response transformation logic
+- ❌ Error handling for AI-specific failures
+
+**Services Running:**
+- Port 3000: UtoBloom main server
+- Port 5173: Vite dev client  
+- Port 3001: Our adapter (currently mock, needs your API integration)
+- Port ?: Your AI API with Ollama (unknown location)
+
+---
+
+## 💡 Example: How Adapter Will Work
+
+```javascript
+// utovision-api/server.js (our adapter)
+
+app.post('/api/analyze/plant', async (req, res) => {
+  const { frames, question, context } = req.body;
+  
+  try {
+    // Transform our format → your API format
+    const externalRequest = {
+      image: frames[0], // or all 3 frames?
       context: {
-        plant_id: plantData.id,
-        species: plantData.species,
-        current_moisture: plantData.moisture,
-        temperature_c: plantData.temperature,
-        humidity_percent: plantData.humidity,
-        light_lux: plantData.light
+        plant_id: context.plant_id,
+        species: context.species,
+        // include sensor data? moisture, temp, light?
       },
       options: {
         include_care_recommendations: true
       }
-    })
-  });
-
-  return await response.json();
-};
-```
-
-### **WebSocket Streaming**
-
-```javascript
-const ws = new WebSocket('ws://localhost:3000/api/stream?token=YOUR_API_KEY');
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  if (data.type === 'analysis') {
-    console.log('Scene:', data.analysis.description);
-    console.log('Changed:', data.analysis.scene_changed);
+    };
+    
+    // Forward to YOUR AI API
+    const aiResponse = await fetch('YOUR_API_URL/api/analyze/plant', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(externalRequest)
+    });
+    
+    const aiResult = await aiResponse.json();
+    
+    // Return to UtoBloom client (maybe transform if needed)
+    res.json(aiResult);
+    
+  } catch (error) {
+    // Handle Ollama offline, network errors, etc.
+    res.status(503).json({
+      error: {
+        code: 'AI_UNAVAILABLE',
+        message: 'AI service temporarily unavailable'
+      }
+    });
   }
-};
-
-// Send frames
-ws.send(JSON.stringify({
-  action: 'analyze',
-  image: base64Frame,
-  timestamp: Date.now()
-}));
-```
-
----
-
-## 🏃 Running the API
-
-### **Development**
-```bash
-cd api-server
-npm run dev     # Auto-reload on changes
-```
-
-### **Production**
-```bash
-cd api-server
-npm start
-```
-
-### **Server Info**
-- **URL:** http://localhost:3000
-- **WebSocket:** ws://localhost:3000/api/stream
-- **Health:** http://localhost:3000/health
-- **Status:** http://localhost:3000/api/status
-
----
-
-## ✅ What Changed in Your React App
-
-**MINIMAL IMPACT!** Only one file changed:
-
-```javascript
-// src/components/CameraView.jsx
-// OLD:
-import { hasSignificantSceneChange } from '../utils/sceneAnalysis';
-
-// NEW:
-import { hasSignificantSceneChange } from '../../shared/sceneAnalysis';
-```
-
-**Everything else works exactly the same.** Your React app still:
-- Uses Vite proxy to Ollama
-- Has full camera, water ripples, UI
-- Works independently of the API server
-
----
-
-## 📈 Rate Limits
-
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| Global | 10 requests | 60 seconds |
-| Plant Analysis | 5 requests | 1 hour |
-| Batch | 3 requests | 1 hour |
-| Concurrent | 3 simultaneous | Always |
-
-Exceeded limits return `429 Too Many Requests` with retry-after headers.
-
----
-
-## 📝 Logging
-
-Logs stored in `api-server/logs/`:
-- **combined.log** - All events
-- **error.log** - Errors only
-
-Console output in development mode.
-
----
-
-## 🧪 Testing
-
-See `api-server/TESTING.md` for:
-- PowerShell test scripts
-- cURL examples
-- WebSocket tests
-- Integration examples
-- Error handling tests
-
----
-
-## 🔮 Next Steps
-
-1. **Change API Key** in `api-server/.env`
-2. **Start Ollama** (if not running): `ollama serve`
-3. **Pull Models** (if needed):
-   ```bash
-   ollama pull qwen3-vl:235b
-   ollama pull llava:latest
-   ```
-4. **Test Endpoints** using examples in `TESTING.md`
-5. **Integrate with UtoBloom** or other apps
-6. **Deploy** (optional) - Consider Docker, PM2, or cloud hosting
-
----
-
-## 🎉 Benefits
-
-✅ **Reusable** - Use in any project (web, mobile, desktop)  
-✅ **Scalable** - Queue management & rate limiting built-in  
-✅ **Maintainable** - Clean separation of concerns  
-✅ **Documented** - Full API spec + examples  
-✅ **Tested** - Error handling & edge cases covered  
-✅ **Production-Ready** - Security, logging, validation  
-
----
-
-## 🆘 Troubleshooting
-
-**Ollama Offline Error:**
-- Start Ollama: `ollama serve`
-- Check models: `ollama list`
-
-**Rate Limit Errors:**
-- Wait for window to reset
-- Increase limits in `.env`
-
-**Authentication Errors:**
-- Check API key in requests
-- Verify `.env` configuration
-
-**Can't Connect:**
-- Verify server running: `http://localhost:3000/health`
-- Check port 3000 not in use
-
----
-
-## 📚 Full Documentation
-
-- **API Spec:** `UtoBloom/UTOVISION_API_SPEC.md` (comprehensive)
-- **README:** `api-server/README.md` (quick start)
-- **Testing:** `api-server/TESTING.md` (examples)
-
----
-
-**Your sophisticated scene analysis is now a reusable API! 🚀**
+});
